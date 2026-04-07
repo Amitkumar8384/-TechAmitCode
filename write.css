@@ -1,0 +1,147 @@
+body{
+
+font-family:Arial, Helvetica, sans-serif;
+
+background:#0f172a;
+
+color:white;
+
+padding:40px;
+
+}
+
+
+/* CONTAINER */
+
+.editor-container{
+
+max-width:900px;
+
+margin:auto;
+
+background:#1e293b;
+
+padding:30px;
+
+border-radius:12px;
+
+box-shadow:0 10px 30px rgba(0,0,0,0.4);
+
+}
+
+
+/* TITLE */
+
+.editor-container h1{
+
+margin-bottom:20px;
+
+}
+
+
+/* INPUT */
+
+input{
+
+width:100%;
+
+padding:12px;
+
+font-size:18px;
+
+border:none;
+
+border-radius:6px;
+
+margin-bottom:15px;
+
+}
+
+
+/* TOOLBAR */
+
+.toolbar{
+
+display:flex;
+
+gap:10px;
+
+margin-bottom:10px;
+
+flex-wrap:wrap;
+
+}
+
+.toolbar button{
+
+padding:8px 14px;
+
+border:none;
+
+background:#334155;
+
+color:white;
+
+cursor:pointer;
+
+border-radius:6px;
+
+transition:0.2s;
+
+}
+
+.toolbar button:hover{
+
+background:#475569;
+
+}
+
+
+/* EDITOR */
+
+.editor{
+
+min-height:250px;
+
+background:#020617;
+
+padding:15px;
+
+border-radius:8px;
+
+outline:none;
+
+line-height:1.6;
+
+}
+
+
+/* PUBLISH BUTTON */
+
+.publish-btn{
+
+margin-top:15px;
+
+padding:12px 18px;
+
+background:#60a5fa;
+
+border:none;
+
+color:black;
+
+font-weight:bold;
+
+cursor:pointer;
+
+border-radius:8px;
+
+transition:0.3s;
+
+}
+
+.publish-btn:hover{
+
+background:#3b82f6;
+
+}

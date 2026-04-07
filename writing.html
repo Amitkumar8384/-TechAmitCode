@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechAmitCode | Publish Learning Notes</title>
+  <meta
+    name="description"
+    content="Write, save, preview, and publish learning notes directly into the TechAmitCode blog workflow."
+  >
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0f7c90">
+  <meta property="og:site_name" content="TechAmitCode">
+  <meta property="og:title" content="TechAmitCode | Publish Learning Notes">
+  <meta property="og:description" content="Write, save, preview, and publish learning notes directly into the TechAmitCode blog workflow.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="editor">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">T</span>
+        <span>
+          <strong>TechAmitCode</strong>
+          <small>Build skills that ship</small>
+        </span>
+      </a>
+
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="siteNav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="nav-drawer">
+        <nav class="site-nav" id="siteNav" aria-label="Primary">
+          <a class="nav-link" href="index.html" data-nav="home">Home</a>
+          <div class="nav-group" data-nav-group="learn">
+            <button class="nav-parent" type="button" data-nav-parent="learn" aria-expanded="false">
+              <span>Learn</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="notes.html" data-nav="notes">Notes</a>
+              <a class="nav-sublink" href="tutorials.html" data-nav="tutorials">Tutorials</a>
+              <a class="nav-sublink" href="cheatsheets.html" data-nav="cheatsheets">Cheat Sheets</a>
+            </div>
+          </div>
+          <div class="nav-group" data-nav-group="practice">
+            <button class="nav-parent" type="button" data-nav-parent="practice" aria-expanded="false">
+              <span>Practice</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="interview.html" data-nav="interview">Interview</a>
+              <a class="nav-sublink" href="projects.html" data-nav="projects">Projects</a>
+            </div>
+          </div>
+          <div class="nav-group" data-nav-group="create">
+            <button class="nav-parent" type="button" data-nav-parent="create" aria-expanded="false">
+              <span>Create</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="writing.html" data-nav="editor">Editor</a>
+            </div>
+          </div>
+          <a class="nav-link" href="blog.html" data-nav="blog">Blog</a>
+        </nav>
+
+        <form class="global-search" action="search.html" method="get" role="search">
+          <input class="global-search-input" type="search" name="q" placeholder="Search the website" aria-label="Search entire website">
+          <button class="button global-search-submit" type="submit">Search</button>
+        </form>
+        <div class="header-actions">
+          <a class="button button-ghost" href="blog.html">View Blog</a>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Theme</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="section editor-studio">
+      <section class="editor-hero surface">
+        <div class="editor-hero-copy">
+          <p class="eyebrow">Publishing studio</p>
+          <h1>Write like a real blog editor, then publish directly into your site.</h1>
+          <p class="hero-text">
+            Draft articles, notes, or interview answers with a cleaner writing canvas, structured publishing controls, and a live preview that mirrors the final post.
+          </p>
+        </div>
+        <div class="editor-hero-meta">
+          <div class="status-pill">Drafts and published posts are saved in local storage</div>
+          <div class="mini-grid">
+            <span>Live preview</span>
+            <span>Reusable templates</span>
+            <span>Local-first publishing</span>
+            <span>Blog-ready workflow</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="editor-workspace">
+        <section class="surface editor-panel writer-shell">
+          <div class="writer-header">
+            <div>
+              <p class="eyebrow">Compose</p>
+              <h2>Story-first writing canvas</h2>
+            </div>
+            <div class="writer-status" id="editorModeBadge">Draft mode</div>
+          </div>
+
+          <form id="editorForm" class="editor-form writer-form">
+            <section class="editor-section-card">
+              <div class="editor-section-head">
+                <div>
+                  <p class="eyebrow">Post setup</p>
+                  <h3>Define the article frame</h3>
+                </div>
+              </div>
+
+              <div class="field-grid">
+                <label>
+                  <span>Publish as</span>
+                  <select id="postTypeInput" name="contentType" required>
+                    <option value="note">Note</option>
+                    <option value="blog">Blog post</option>
+                    <option value="interview">Interview question</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Category</span>
+                  <select id="postCategoryInput" name="category" required>
+                    <option value="">Select a category</option>
+                    <option value="HTML">HTML</option>
+                    <option value="Frontend">Frontend</option>
+                    <option value="JavaScript">JavaScript</option>
+                    <option value="CSS">CSS</option>
+                    <option value="React">React</option>
+                    <option value="Tools">Tools</option>
+                    <option value="Career">Career</option>
+                    <option value="Workflow">Workflow</option>
+                  </select>
+                </label>
+              </div>
+
+              <label class="editor-title-field">
+                <span>Title</span>
+                <input type="text" id="postTitleInput" name="title" placeholder="Example: How I built a reusable card system" required>
+              </label>
+
+              <div class="field-grid">
+                <label>
+                  <span>Read time</span>
+                  <input type="text" id="postReadTimeInput" name="readTime" placeholder="8 min read" required>
+                </label>
+                <label>
+                  <span>Tags</span>
+                  <input type="text" id="postTagsInput" name="tags" placeholder="ui systems, components, architecture">
+                </label>
+              </div>
+
+              <label>
+                <span>Excerpt</span>
+                <textarea id="postExcerptInput" name="excerpt" rows="3" placeholder="Write a sharp summary for cards, previews, and readers." required></textarea>
+              </label>
+
+              <div class="editor-side-block mcq-builder" id="editorInterviewFields" hidden>
+                <div class="section-heading">
+                  <div>
+                    <p class="eyebrow">Interview setup</p>
+                    <h3>Build a real MCQ question</h3>
+                  </div>
+                </div>
+                <div class="field-grid">
+                  <label>
+                    <span>Companies</span>
+                    <input type="text" id="postCompaniesInput" placeholder="Amazon, Flipkart, Infosys">
+                  </label>
+                  <label>
+                    <span>Level</span>
+                    <input type="text" id="postLevelInput" placeholder="Beginner or Intermediate">
+                  </label>
+                </div>
+                <div class="field-grid mcq-option-grid">
+                  <label>
+                    <span>Option A</span>
+                    <input type="text" id="postOptionAInput" placeholder="First option">
+                  </label>
+                  <label>
+                    <span>Option B</span>
+                    <input type="text" id="postOptionBInput" placeholder="Second option">
+                  </label>
+                  <label>
+                    <span>Option C</span>
+                    <input type="text" id="postOptionCInput" placeholder="Third option">
+                  </label>
+                  <label>
+                    <span>Option D</span>
+                    <input type="text" id="postOptionDInput" placeholder="Fourth option">
+                  </label>
+                </div>
+                <label>
+                  <span>Correct option</span>
+                  <select id="postCorrectOptionInput">
+                    <option value="">Select correct option</option>
+                    <option value="A">Option A</option>
+                    <option value="B">Option B</option>
+                    <option value="C">Option C</option>
+                    <option value="D">Option D</option>
+                  </select>
+                </label>
+                <p class="card-excerpt">Interview mode me options bharoge to post MCQ quiz style me publish hoga. Sirf answer likhoge to normal interview answer rahega.</p>
+              </div>
+            </section>
+
+            <section class="editor-section-card">
+              <div class="editor-section-head">
+                <div>
+                  <p class="eyebrow">Body</p>
+                  <h3>Write the main post</h3>
+                </div>
+                <div class="template-tools template-ribbon">
+                  <button class="button button-ghost button-small" id="insertSummaryTemplate" type="button">Summary</button>
+                  <button class="button button-ghost button-small" id="insertInterviewTemplate" type="button">Interview</button>
+                  <button class="button button-ghost button-small" id="insertSnippetTemplate" type="button">Snippet</button>
+                </div>
+              </div>
+
+              <div class="writer-toolbar" aria-label="Writing tools">
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="bold" aria-label="Bold text" title="Bold">
+                  <i class="fa-solid fa-bold" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="italic" aria-label="Italic text" title="Italic">
+                  <i class="fa-solid fa-italic" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="h2" aria-label="Heading" title="Heading">
+                  <i class="fa-solid fa-heading" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="quote" aria-label="Quote" title="Quote">
+                  <i class="fa-solid fa-quote-left" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="ul" aria-label="Bullet list" title="Bullets">
+                  <i class="fa-solid fa-list-ul" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="ol" aria-label="Numbered list" title="Numbering">
+                  <i class="fa-solid fa-list-ol" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="link" aria-label="Insert link" title="Link">
+                  <i class="fa-solid fa-link" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="image" aria-label="Insert image" title="Image">
+                  <i class="fa-solid fa-image" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="accent" aria-label="Accent text" title="Accent">
+                  <i class="fa-solid fa-wand-magic-sparkles" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="highlight" aria-label="Highlight text" title="Highlight">
+                  <i class="fa-solid fa-highlighter" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="serif" aria-label="Serif style" title="Serif">
+                  <i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>
+                </button>
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="mono" aria-label="Monospace style" title="Mono">
+                  <i class="fa-solid fa-terminal" aria-hidden="true"></i>
+                </button>
+                <label class="editor-tool-select" aria-label="Change text font">
+                  <i class="fa-solid fa-font" aria-hidden="true"></i>
+                  <select id="editorFontSelect">
+                    <option value="">Font</option>
+                    <option value="Outfit">Outfit</option>
+                    <option value="Georgia">Serif</option>
+                    <option value="Courier New">Mono</option>
+                  </select>
+                </label>
+                <label class="editor-tool-color" aria-label="Change text color">
+                  <i class="fa-solid fa-palette" aria-hidden="true"></i>
+                  <input id="editorColorInput" type="color" value="#0f7c90">
+                </label>
+              </div>
+
+              <label class="writer-main-field">
+                <span>Main content</span>
+                <div class="writer-editor-shell">
+                  <div id="postContentEditor" class="writer-editor" contenteditable="true" data-placeholder="Open with a strong setup, build the idea clearly, then close with the practical takeaway."></div>
+                </div>
+                <textarea id="postContentInput" name="content" rows="14" hidden></textarea>
+              </label>
+
+              <label>
+                <span>Code example</span>
+                <textarea id="postCodeInput" name="code" rows="8" placeholder="Optional code snippet"></textarea>
+              </label>
+            </section>
+
+            <div class="editor-actions writer-actions">
+              <button class="button button-ghost" id="saveDraftButton" type="button">Save Draft</button>
+              <button class="button button-ghost" id="clearDraftButton" type="button">Reset Form</button>
+              <button class="button" id="publishPostButton" type="submit">Publish Post</button>
+            </div>
+          </form>
+
+          <p class="form-message" id="editorMessage" aria-live="polite"></p>
+          <p class="editor-helper" id="editorHelper">Use note mode for revision-style content and blog mode for longer explanation articles.</p>
+        </section>
+
+        <aside class="surface preview-panel publish-sidebar">
+          <div class="preview-header">
+            <div>
+              <p class="eyebrow">Live preview</p>
+              <h2 id="previewTitle">Untitled post</h2>
+            </div>
+            <span class="status-pill" id="previewMeta">Draft preview</span>
+          </div>
+
+          <div class="editor-side-block">
+            <p class="eyebrow">Publishing checklist</p>
+            <ul class="check-list editor-checklist">
+              <li>Add a title that reads like a finished post</li>
+              <li>Write a short excerpt for cards and previews</li>
+              <li>Use tags so the post is easier to find later</li>
+              <li>Include code only when it clarifies the idea</li>
+            </ul>
+          </div>
+
+          <div class="editor-stats">
+            <div class="progress-badge">
+              <strong id="previewWordCount">0</strong>
+              <span>Words</span>
+            </div>
+            <div class="progress-badge">
+              <strong id="previewParagraphCount">0</strong>
+              <span>Paragraphs</span>
+            </div>
+          </div>
+
+          <div class="editor-side-block preview-stack">
+            <p class="preview-excerpt" id="previewExcerpt">Your excerpt will appear here.</p>
+            <div class="tag-row" id="previewTags"></div>
+            <div class="article-body article-preview" id="previewContent">
+              <p>Start typing to preview your article body.</p>
+            </div>
+            <pre class="code-block" id="previewCode">Optional code example preview</pre>
+          </div>
+        </aside>
+      </div>
+
+      <section class="section section-tight editor-library">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Published locally</p>
+            <h2>Your custom resources</h2>
+          </div>
+          <a class="text-link" href="notes.html">Open notes listing</a>
+        </div>
+        <div class="content-grid" id="localPostsGrid"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer surface">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html">
+            <span class="brand-mark">T</span>
+            <span><strong>TechAmitCode</strong><small>Build skills that ship</small></span>
+          </a>
+          <p>Write, preview, and publish notes, blog posts, and interview resources from one clean local-first editor.</p>
+        </div>
+        <div>
+          <p class="footer-heading">Explore</p>
+          <div class="footer-links">
+            <a href="notes.html">Notes</a>
+            <a href="tutorials.html">Tutorials</a>
+            <a href="projects.html">Projects</a>
+            <a href="blog.html">Blog</a>
+          </div>
+        </div>
+        <div>
+          <p class="footer-heading">Practice</p>
+          <div class="footer-links">
+            <a href="interview.html">Interview Questions</a>
+            <a href="cheatsheets.html">Cheat Sheets</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="writing.html">Editor</a>
+          </div>
+        </div>
+        <div>
+          <p class="footer-heading">Workspace</p>
+          <div class="footer-links">
+            <a href="admin.html">Admin Panel</a>
+            <a href="blog.html">Published Posts</a>
+            <a href="notes.html">Published Notes</a>
+            <a href="dashboard.html">Progress</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Create once, preview live, and publish straight into the study workflow.</p>
+        <p>TechAmitCode</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

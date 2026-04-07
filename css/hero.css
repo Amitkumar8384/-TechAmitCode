@@ -1,0 +1,44 @@
+.hero{
+
+height:90vh;
+
+display:flex;
+align-items:center;
+
+padding:0 10%;
+
+}
+
+.hero h1{
+
+font-size:60px;
+
+color:var(--text-color);
+
+}
+
+.hero p{
+
+margin-top:20px;
+
+color:#cbd5f5;
+
+line-height:1.6;
+
+}
+
+.hero button{
+
+margin-top:30px;
+
+padding:12px 30px;
+
+border-radius:40px;
+
+background:var(--accent);
+
+color:black;
+
+font-weight:600;
+
+}

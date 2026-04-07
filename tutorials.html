@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechAmitCode | Tutorials</title>
+  <meta name="description" content="Browse practical tutorials on HTML, CSS, JavaScript, UI systems, and frontend workflows.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0f7c90">
+  <meta property="og:site_name" content="TechAmitCode">
+  <meta property="og:title" content="TechAmitCode | Tutorials">
+  <meta property="og:description" content="Browse practical tutorials on HTML, CSS, JavaScript, UI systems, and frontend workflows.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="tutorials">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">T</span>
+        <span>
+          <strong>TechAmitCode</strong>
+          <small>Build skills that ship</small>
+        </span>
+      </a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="siteNav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-drawer">
+        <nav class="site-nav" id="siteNav" aria-label="Primary">
+          <a class="nav-link" href="index.html" data-nav="home">Home</a>
+          <div class="nav-group" data-nav-group="learn">
+            <button class="nav-parent" type="button" data-nav-parent="learn" aria-expanded="false">
+              <span>Learn</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="notes.html" data-nav="notes">Notes</a>
+              <a class="nav-sublink" href="tutorials.html" data-nav="tutorials">Tutorials</a>
+              <a class="nav-sublink" href="cheatsheets.html" data-nav="cheatsheets">Cheat Sheets</a>
+            </div>
+          </div>
+          <div class="nav-group" data-nav-group="practice">
+            <button class="nav-parent" type="button" data-nav-parent="practice" aria-expanded="false">
+              <span>Practice</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="interview.html" data-nav="interview">Interview</a>
+              <a class="nav-sublink" href="projects.html" data-nav="projects">Projects</a>
+            </div>
+          </div>
+          <div class="nav-group" data-nav-group="create">
+            <button class="nav-parent" type="button" data-nav-parent="create" aria-expanded="false">
+              <span>Create</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="writing.html" data-nav="editor">Editor</a>
+            </div>
+          </div>
+          <a class="nav-link" href="blog.html" data-nav="blog">Blog</a>
+        </nav>
+        <form class="global-search" action="search.html" method="get" role="search">
+          <input class="global-search-input" type="search" name="q" placeholder="Search the website" aria-label="Search entire website">
+          <button class="button global-search-submit" type="submit">Search</button>
+        </form>
+        <div class="header-actions">
+          <a class="button button-ghost" href="content.html?type=tutorial&slug=css-architecture">Open Featured Tutorial</a>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Theme</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Tutorial library</p>
+          <h1>Learn the process, not only the syntax</h1>
+        </div>
+        <div class="status-pill">Search, filter, and jump into detailed guides</div>
+      </div>
+
+      <section class="surface filter-panel">
+        <label class="search-field">
+          <span class="sr-only">Search tutorials</span>
+          <input id="listingSearch" type="search" placeholder="Search tutorials by topic or outcome">
+        </label>
+        <div class="filter-chips" id="listingChips"></div>
+      </section>
+
+      <section class="section section-tight">
+        <div class="content-grid" id="listingGrid"></div>
+        <p class="empty-state" id="listingEmpty" hidden>No tutorials matched the current filters.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer surface">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html">
+            <span class="brand-mark">T</span>
+            <span><strong>TechAmitCode</strong><small>Build skills that ship</small></span>
+          </a>
+          <p>Learn practical frontend systems, layout thinking, DOM state, and implementation detail through tutorials that ship.</p>
+        </div>
+        <div>
+          <p class="footer-heading">Explore</p>
+          <div class="footer-links">
+            <a href="notes.html">Notes</a>
+            <a href="tutorials.html">Tutorials</a>
+            <a href="projects.html">Projects</a>
+            <a href="blog.html">Blog</a>
+          </div>
+        </div>
+        <div>
+          <p class="footer-heading">Practice</p>
+          <div class="footer-links">
+            <a href="interview.html">Interview Questions</a>
+            <a href="cheatsheets.html">Cheat Sheets</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="writing.html">Editor</a>
+          </div>
+        </div>
+        <div>
+          <p class="footer-heading">Workspace</p>
+          <div class="footer-links">
+            <a href="admin.html">Admin Panel</a>
+            <a href="content.html?type=tutorial&slug=css-architecture">CSS Architecture</a>
+            <a href="content.html?type=tutorial&slug=dom-state-workflow">DOM State</a>
+            <a href="content.html?type=tutorial&slug=responsive-dashboard">Responsive Dashboard</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Tutorials focus on process, tradeoffs, and reusable patterns instead of isolated syntax drills.</p>
+        <p>TechAmitCode</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

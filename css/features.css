@@ -1,0 +1,274 @@
+.code-box{
+
+background:#020617;
+
+padding:20px;
+
+border-radius:12px;
+
+margin:20px 0;
+
+position:relative;
+
+border:1px solid #38bdf8;
+
+box-shadow:0 0 20px rgba(56,189,248,0.2);
+
+}
+
+.code-box pre{
+
+color:#4ade80;
+
+font-family:monospace;
+
+}
+
+.copy{
+
+position:absolute;
+
+top:10px;
+right:10px;
+
+background:#38bdf8;
+
+color:black;
+
+padding:6px 12px;
+
+border-radius:6px;
+
+}
+
+.content img{
+
+width:100%;
+
+border-radius:12px;
+
+margin:20px 0;
+
+}
+
+/* =========================
+   PAGINATION
+========================= */
+
+.pagination{
+
+margin-top:30px;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+gap:8px;
+
+}
+
+/* BUTTON */
+
+.pagination button{
+
+background:rgba(255,255,255,0.08);
+
+border:1px solid rgba(255,255,255,0.1);
+
+padding:8px 14px;
+
+border-radius:8px;
+
+color:white;
+
+font-size:14px;
+
+cursor:pointer;
+
+transition:0.3s;
+
+backdrop-filter:blur(10px);
+
+}
+
+/* HOVER */
+
+.pagination button:hover{
+
+background:var(--accent);
+
+color:black;
+
+transform:translateY(-2px);
+
+box-shadow:0 4px 12px rgba(96,165,250,0.4);
+
+}
+
+/* ACTIVE */
+
+.pagination .active{
+
+background:var(--accent);
+
+color:black;
+
+font-weight:600;
+
+}
+
+/* DISABLED */
+
+.pagination button:disabled{
+
+opacity:0.5;
+
+cursor:not-allowed;
+
+}
+/* =========================
+   TOOLS SIDEBAR
+========================= */
+
+.tools{
+
+padding:20px;
+
+border-radius:16px;
+
+background:rgba(255,255,255,0.05);
+
+border:1px solid rgba(255,255,255,0.1);
+
+backdrop-filter:blur(20px);
+
+box-shadow:0 8px 25px rgba(0,0,0,0.25);
+
+display:flex;
+
+flex-direction:column;
+
+gap:18px;
+
+}
+
+
+/* TITLE */
+
+.tools h3{
+
+font-size:18px;
+
+color:#60a5fa;
+
+margin-bottom:5px;
+
+}
+
+
+/* LIST */
+
+.tools ul{
+
+list-style:none;
+
+display:flex;
+
+flex-direction:column;
+
+gap:10px;
+
+}
+
+
+/* LINKS */
+
+.tools li a{
+
+display:block;
+
+padding:10px 12px;
+
+border-radius:8px;
+
+text-decoration:none;
+
+color:var(--text-color);
+
+font-size:14px;
+
+transition:all 0.25s ease;
+
+}
+
+
+/* HOVER EFFECT */
+
+.tools li a:hover{
+
+background:rgba(96,165,250,0.15);
+
+transform:translateX(5px);
+
+color:#60a5fa;
+
+}
+
+
+/* SEARCH INPUT */
+
+.tools input{
+
+padding:10px 12px;
+
+border-radius:8px;
+
+border:1px solid rgba(255,255,255,0.1);
+
+background:rgba(255,255,255,0.08);
+
+color:var(--text-color);
+
+font-size:14px;
+
+outline:none;
+
+transition:0.25s;
+
+}
+
+
+/* INPUT FOCUS */
+
+.tools input:focus{
+
+border-color:#60a5fa;
+
+background:rgba(255,255,255,0.12);
+
+}
+
+
+/* LIGHT MODE */
+
+body.light .tools{
+
+background:rgba(255,255,255,0.6);
+
+border:1px solid rgba(0,0,0,0.08);
+
+box-shadow:0 8px 20px rgba(0,0,0,0.1);
+
+}
+
+body.light .tools input{
+
+background:white;
+
+border:1px solid #e2e8f0;
+
+color:black;
+
+}

@@ -1,0 +1,54 @@
+body::before,
+body::after{
+
+content:"";
+position:absolute;
+
+/* width:300px;
+height:300px; */
+
+border-radius:50%;
+
+filter:blur(120px);
+
+z-index:-1;
+
+}
+
+body::before{
+
+background:var(--glow-blue);
+
+top:-100px;
+left:-100px;
+
+}
+
+body::after{
+
+background:var(--glow-pink);
+
+bottom:-100px;
+right:-100px;
+
+}
+
+body.light{
+
+background:#f8fafc;
+
+color:black;
+
+}
+
+body.light .navbar{
+
+background:white;
+
+}
+
+body.light a{
+
+color:black;
+
+}

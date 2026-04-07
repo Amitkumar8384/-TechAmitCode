@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechAmitCode | Content Detail</title>
+  <meta name="description" content="Read full tutorials, project breakdowns, and blog posts on TechAmitCode.">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#0f7c90">
+  <meta property="og:site_name" content="TechAmitCode">
+  <meta property="og:title" content="TechAmitCode | Content Detail">
+  <meta property="og:description" content="Read full tutorials, project breakdowns, and blog posts on TechAmitCode.">
+  <meta property="og:type" content="article">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet"
+  >
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body data-page="content">
+  <div class="site-shell">
+    <header class="site-header">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">T</span>
+        <span>
+          <strong>TechAmitCode</strong>
+          <small>Build skills that ship</small>
+        </span>
+      </a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="siteNav">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+      <div class="nav-drawer">
+        <nav class="site-nav" id="siteNav" aria-label="Primary">
+          <a class="nav-link" href="index.html" data-nav="home">Home</a>
+          <div class="nav-group" data-nav-group="learn">
+            <button class="nav-parent" type="button" data-nav-parent="learn" aria-expanded="false">
+              <span>Learn</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="notes.html" data-nav="notes">Notes</a>
+              <a class="nav-sublink" href="tutorials.html" data-nav="tutorials">Tutorials</a>
+              <a class="nav-sublink" href="cheatsheets.html" data-nav="cheatsheets">Cheat Sheets</a>
+            </div>
+          </div>
+          <div class="nav-group" data-nav-group="practice">
+            <button class="nav-parent" type="button" data-nav-parent="practice" aria-expanded="false">
+              <span>Practice</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="interview.html" data-nav="interview">Interview</a>
+              <a class="nav-sublink" href="projects.html" data-nav="projects">Projects</a>
+            </div>
+          </div>
+          <div class="nav-group" data-nav-group="create">
+            <button class="nav-parent" type="button" data-nav-parent="create" aria-expanded="false">
+              <span>Create</span>
+              <span class="nav-caret"></span>
+            </button>
+            <div class="nav-submenu">
+              <a class="nav-sublink" href="writing.html" data-nav="editor">Editor</a>
+            </div>
+          </div>
+          <a class="nav-link" href="blog.html" data-nav="blog">Blog</a>
+        </nav>
+        <form class="global-search" action="search.html" method="get" role="search">
+          <input class="global-search-input" type="search" name="q" placeholder="Search the website" aria-label="Search entire website">
+          <button class="button global-search-submit" type="submit">Search</button>
+        </form>
+        <div class="header-actions">
+          <a class="button button-ghost" id="detailBackLink" href="blog.html">Back to listing</a>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Theme</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="section">
+      <article class="detail-layout detail-experience" id="detailContainer">
+        <section class="surface detail-main detail-main-premium">
+          <div class="detail-meta">
+            <p class="eyebrow" id="detailType">Content</p>
+            <div class="detail-actions">
+              <button class="button button-ghost button-small" id="detailActionButton" type="button" hidden>Mark Studied</button>
+              <button class="button button-ghost button-small" id="detailSecondaryButton" type="button" hidden>Print / Save PDF</button>
+              <button class="bookmark-button" id="bookmarkButton" type="button">Save</button>
+            </div>
+          </div>
+          <div class="detail-hero-copy">
+            <h1 id="detailTitle">Loading content...</h1>
+            <p class="detail-summary" id="detailExcerpt"></p>
+          </div>
+          <div class="detail-meta-stack">
+            <div class="meta-row" id="detailMetaRow"></div>
+            <div class="tag-row" id="detailTags"></div>
+          </div>
+          <div class="detail-reading-shell">
+            <div class="article-body" id="detailBody"></div>
+          </div>
+          <pre class="code-block" id="detailCode" hidden></pre>
+          <p class="form-message" id="detailMessage" aria-live="polite"></p>
+        </section>
+
+        <aside class="detail-side detail-side-premium">
+          <section class="surface detail-side-card">
+            <p class="eyebrow">Continue exploring</p>
+            <div class="related-list" id="relatedList"></div>
+          </section>
+          <section class="surface detail-side-card">
+            <p class="eyebrow">Notes</p>
+            <p>This detail page supports local comments and bookmarks to simulate a production content workflow without a backend.</p>
+          </section>
+        </aside>
+      </article>
+
+      <section class="section section-tight detail-comments-wrap">
+        <div class="surface comments-panel comments-panel-premium">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Discussion</p>
+              <h2>Comments</h2>
+            </div>
+          </div>
+          <form id="commentForm" class="comment-form">
+            <label>
+              <span>Name</span>
+              <input id="commentName" name="name" type="text" placeholder="Your name" required>
+            </label>
+            <label>
+              <span>Comment</span>
+              <textarea id="commentText" name="comment" rows="4" placeholder="Add something useful to the discussion." required></textarea>
+            </label>
+            <button class="button" type="submit">Post Comment</button>
+          </form>
+          <p class="form-message" id="commentMessage" aria-live="polite"></p>
+          <div class="comment-list" id="commentList"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer surface">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html">
+            <span class="brand-mark">T</span>
+            <span><strong>TechAmitCode</strong><small>Build skills that ship</small></span>
+          </a>
+          <p>Open any note, article, project, or cheat sheet and keep your learning workflow connected with bookmarks and comments.</p>
+        </div>
+        <div>
+          <p class="footer-heading">Explore</p>
+          <div class="footer-links">
+            <a href="notes.html">Notes</a>
+            <a href="tutorials.html">Tutorials</a>
+            <a href="projects.html">Projects</a>
+            <a href="blog.html">Blog</a>
+          </div>
+        </div>
+        <div>
+          <p class="footer-heading">Practice</p>
+          <div class="footer-links">
+            <a href="interview.html">Interview Questions</a>
+            <a href="cheatsheets.html">Cheat Sheets</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="writing.html">Editor</a>
+          </div>
+        </div>
+        <div>
+          <p class="footer-heading">Workspace</p>
+          <div class="footer-links">
+            <a href="admin.html">Admin Panel</a>
+            <a href="index.html">Home</a>
+            <a href="dashboard.html">Progress Tracker</a>
+            <a href="writing.html">Publish Resource</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>Detail pages support local bookmarking, printing, and discussion for a realistic content flow.</p>
+        <p>TechAmitCode</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

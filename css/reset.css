@@ -1,0 +1,32 @@
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:"Poppins",sans-serif;
+}
+
+body{
+
+background:
+radial-gradient(circle at 20% 20%, #3b82f6 0%, transparent 40%),
+radial-gradient(circle at 80% 80%, #ff00aa 0%, transparent 40%),
+linear-gradient(135deg,#0f172a,#1e293b);
+
+color:white;
+min-height:100vh;
+
+}
+
+a{
+text-decoration:none;
+color:inherit;
+}
+
+ul{
+list-style:none;
+}
+
+button{
+cursor:pointer;
+border:none;
+}

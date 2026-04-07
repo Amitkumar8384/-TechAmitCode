@@ -1,0 +1,51 @@
+.glass-footer{
+
+padding:60px 8%;
+
+background:rgba(255,255,255,0.05);
+
+backdrop-filter:blur(20px);
+
+border-top:1px solid rgba(255,255,255,0.1);
+
+border-radius:20px 20px 0 0;
+
+}
+
+.footer-container{
+
+display:grid;
+
+grid-template-columns:2fr 1fr 1fr;
+
+gap:60px;
+
+}
+
+.footer-logo{
+
+font-size:26px;
+
+color:var(--accent);
+
+}
+
+.footer-box a{
+
+display:block;
+
+margin:8px 0;
+
+color:#e5e7eb;
+
+transition:0.3s;
+
+}
+
+.footer-box a:hover{
+
+color:var(--accent);
+
+transform:translateX(5px);
+
+}
