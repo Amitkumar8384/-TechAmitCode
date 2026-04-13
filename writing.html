@@ -119,8 +119,8 @@
           </div>
 
           <form id="editorForm" class="editor-form writer-form">
-            <section class="editor-section-card">
-              <div class="editor-section-head">
+            <section class="editor-section-card editor-compose-card">
+              <div class="editor-section-head editor-compose-head">
                 <div>
                   <p class="eyebrow">Post setup</p>
                   <h3>Define the article frame</h3>
@@ -147,31 +147,34 @@
                     <option value="React">React</option>
                     <option value="Tools">Tools</option>
                     <option value="Career">Career</option>
+                    <option value="English">English</option>
                     <option value="Workflow">Workflow</option>
                   </select>
                 </label>
               </div>
 
               <label class="editor-title-field">
-                <span>Title</span>
+                <span id="postTitleLabel">Title</span>
                 <input type="text" id="postTitleInput" name="title" placeholder="Example: How I built a reusable card system" required>
               </label>
 
-              <div class="field-grid">
+              <div id="articleOnlyFields">
+                <div class="field-grid">
+                  <label>
+                    <span id="postReadTimeLabel">Read time</span>
+                    <input type="text" id="postReadTimeInput" name="readTime" placeholder="8 min read" required>
+                  </label>
+                  <label>
+                    <span id="postTagsLabel">Tags</span>
+                    <input type="text" id="postTagsInput" name="tags" placeholder="ui systems, components, architecture">
+                  </label>
+                </div>
+
                 <label>
-                  <span>Read time</span>
-                  <input type="text" id="postReadTimeInput" name="readTime" placeholder="8 min read" required>
-                </label>
-                <label>
-                  <span>Tags</span>
-                  <input type="text" id="postTagsInput" name="tags" placeholder="ui systems, components, architecture">
+                  <span id="postExcerptLabel">Excerpt</span>
+                  <textarea id="postExcerptInput" name="excerpt" rows="3" placeholder="Write a sharp summary for cards, previews, and readers." required></textarea>
                 </label>
               </div>
-
-              <label>
-                <span>Excerpt</span>
-                <textarea id="postExcerptInput" name="excerpt" rows="3" placeholder="Write a sharp summary for cards, previews, and readers." required></textarea>
-              </label>
 
               <div class="editor-side-block mcq-builder" id="editorInterviewFields" hidden>
                 <div class="section-heading">
@@ -222,20 +225,20 @@
               </div>
             </section>
 
-            <section class="editor-section-card">
-              <div class="editor-section-head">
+            <section class="editor-section-card editor-compose-card">
+              <div class="editor-section-head editor-compose-head">
                 <div>
-                  <p class="eyebrow">Body</p>
-                  <h3>Write the main post</h3>
+                  <p class="eyebrow" id="editorBodyEyebrow">Body</p>
+                  <h3 id="editorBodyHeading">Write the main post</h3>
                 </div>
-                <div class="template-tools template-ribbon">
+                <div class="template-tools template-ribbon" id="editorTemplateTools">
                   <button class="button button-ghost button-small" id="insertSummaryTemplate" type="button">Summary</button>
                   <button class="button button-ghost button-small" id="insertInterviewTemplate" type="button">Interview</button>
                   <button class="button button-ghost button-small" id="insertSnippetTemplate" type="button">Snippet</button>
                 </div>
               </div>
 
-              <div class="writer-toolbar" aria-label="Writing tools">
+              <div class="writer-toolbar writer-toolbar-sticky" aria-label="Writing tools">
                 <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="bold" aria-label="Bold text" title="Bold">
                   <i class="fa-solid fa-bold" aria-hidden="true"></i>
                 </button>
@@ -269,11 +272,14 @@
                 <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="serif" aria-label="Serif style" title="Serif">
                   <i class="fa-solid fa-feather-pointed" aria-hidden="true"></i>
                 </button>
-                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="mono" aria-label="Monospace style" title="Mono">
+                <button class="button button-ghost button-small editor-tool-button" type="button" data-editor-tool="mono" aria-label="Code style" title="Code">
                   <i class="fa-solid fa-terminal" aria-hidden="true"></i>
                 </button>
                 <label class="editor-tool-select" aria-label="Change text font">
-                  <i class="fa-solid fa-font" aria-hidden="true"></i>
+                  <span class="editor-tool-icon"><i class="fa-solid fa-font" aria-hidden="true"></i></span>
+                  <span class="editor-tool-meta">
+                    <span class="editor-tool-label">Font</span>
+                  </span>
                   <select id="editorFontSelect">
                     <option value="">Font</option>
                     <option value="Outfit">Outfit</option>
@@ -282,21 +288,25 @@
                   </select>
                 </label>
                 <label class="editor-tool-color" aria-label="Change text color">
-                  <i class="fa-solid fa-palette" aria-hidden="true"></i>
+                  <span class="editor-tool-icon"><i class="fa-solid fa-palette" aria-hidden="true"></i></span>
+                  <span class="editor-tool-meta">
+                    <span class="editor-tool-label">Color</span>
+                  </span>
                   <input id="editorColorInput" type="color" value="#0f7c90">
                 </label>
               </div>
 
               <label class="writer-main-field">
-                <span>Main content</span>
+                <span id="postContentLabel">Main content</span>
                 <div class="writer-editor-shell">
                   <div id="postContentEditor" class="writer-editor" contenteditable="true" data-placeholder="Open with a strong setup, build the idea clearly, then close with the practical takeaway."></div>
                 </div>
                 <textarea id="postContentInput" name="content" rows="14" hidden></textarea>
+                <input id="editorImageUpload" type="file" accept="image/*" hidden>
               </label>
 
-              <label>
-                <span>Code example</span>
+              <label id="postCodeField">
+                <span id="postCodeLabel">Code example</span>
                 <textarea id="postCodeInput" name="code" rows="8" placeholder="Optional code snippet"></textarea>
               </label>
             </section>
@@ -322,8 +332,8 @@
           </div>
 
           <div class="editor-side-block">
-            <p class="eyebrow">Publishing checklist</p>
-            <ul class="check-list editor-checklist">
+            <p class="eyebrow" id="previewChecklistTitle">Publishing checklist</p>
+            <ul class="check-list editor-checklist" id="previewChecklist">
               <li>Add a title that reads like a finished post</li>
               <li>Write a short excerpt for cards and previews</li>
               <li>Use tags so the post is easier to find later</li>

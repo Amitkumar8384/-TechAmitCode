@@ -980,7 +980,7 @@ body[data-theme="dark"] .global-search-input::placeholder {
 
 body[data-theme="dark"] .button {
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
-  color: #081018;
+  color:rgba(255, 93, 29, 0.695);
   box-shadow: 0 10px 28px rgba(90, 228, 255, 0.2);
 }
 
@@ -1107,6 +1107,10 @@ body[data-theme="dark"] .hero-stats div {
 .metric-card {
   position: relative;
   overflow: hidden;
+}
+
+.editor-panel {
+  overflow: visible;
 }
 
 .preview-panel::after,
@@ -1695,6 +1699,26 @@ textarea {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.46);
 }
 
+.editor-compose-card {
+  gap: 22px;
+  padding: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(44, 166, 178, 0.08), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.08)),
+    var(--surface-strong);
+  border-color: var(--surface-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.46),
+    0 24px 44px rgba(20, 49, 64, 0.08);
+}
+
+.editor-compose-head {
+  align-items: center;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(18, 43, 58, 0.08);
+}
+
 .editor-title-field input {
   font-size: clamp(1.1rem, 2vw, 1.35rem);
   font-weight: 600;
@@ -1731,23 +1755,68 @@ textarea {
   background: rgba(15, 124, 144, 0.12);
 }
 
+.writer-toolbar-sticky {
+  position: sticky;
+  top: 92px;
+  z-index: 20;
+  align-self: start;
+  padding: 14px 16px;
+  border-radius: 22px;
+  border: 1px solid var(--surface-border);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.1)),
+    var(--surface-strong);
+  box-shadow:
+    0 14px 34px rgba(20, 49, 64, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+}
+
 .editor-tool-select,
 .editor-tool-color {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 8px;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: 999px;
+  gap: 10px;
+  min-height: 48px;
+  min-width: 172px;
+  padding: 0 14px;
+  border-radius: 16px;
   border: 1px solid var(--surface-border);
-  background: rgba(255, 255, 255, 0.56);
+  background: rgba(255, 255, 255, 0.72);
   color: var(--accent-strong);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 8px 18px rgba(20, 49, 64, 0.04);
+}
+
+.editor-tool-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  color: var(--accent-strong);
+  background: rgba(15, 124, 144, 0.08);
+}
+
+.editor-tool-meta {
+  display: inline-grid;
+  min-width: 0;
+}
+
+.editor-tool-label {
+  color: var(--text);
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .editor-tool-select select,
 .editor-tool-color input {
-  width: auto;
+  width: 100%;
   min-height: 0;
   padding: 0;
   border: 0;
@@ -1758,26 +1827,30 @@ textarea {
 .editor-tool-select select {
   color: var(--text);
   font-family: "Space Grotesk", sans-serif;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
+  cursor: pointer;
+  appearance: none;
 }
 
 .editor-tool-color input {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .writer-editor-shell {
   border: 1px solid var(--surface-border);
-  border-radius: calc(var(--radius-lg) + 6px);
+  border-radius: 30px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.08)),
     var(--surface-strong);
-  overflow: hidden;
+  overflow: visible;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.52),
-    0 22px 40px rgba(20, 49, 64, 0.08);
+    0 28px 48px rgba(20, 49, 64, 0.08);
   transition: border-color var(--transition-smooth), box-shadow var(--transition-smooth), transform var(--transition-smooth);
 }
 
@@ -1790,19 +1863,21 @@ textarea {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.56),
     0 0 0 4px rgba(44, 166, 178, 0.08),
-    0 24px 42px rgba(20, 49, 64, 0.1);
+    0 28px 52px rgba(20, 49, 64, 0.1);
   transform: translateY(-1px);
 }
 
 .writer-editor {
-  min-height: 360px;
-  padding: 24px 26px;
+  min-height: 560px;
+  padding: 52px 62px 72px;
   outline: none;
-  line-height: 1.9;
-  font-size: 1.08rem;
+  line-height: 2;
+  font-size: 1.14rem;
   font-family: Georgia, "Times New Roman", serif;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.012em;
   color: var(--text);
+  max-width: 74ch;
+  margin: 0 auto;
 }
 
 .writer-editor:empty::before {
@@ -1901,12 +1976,36 @@ body[data-theme="dark"] .publish-sidebar {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+body[data-theme="dark"] .editor-compose-card {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    var(--surface-strong);
+  border-color: rgba(120, 170, 208, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 28px 48px rgba(0, 0, 0, 0.28);
+}
+
+body[data-theme="dark"] .editor-compose-head {
+  border-bottom-color: rgba(120, 170, 208, 0.12);
+}
+
 body[data-theme="dark"] .writer-toolbar,
 body[data-theme="dark"] .writer-editor-shell {
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
     #111b29;
   border-color: rgba(120, 170, 208, 0.15);
+}
+
+body[data-theme="dark"] .writer-toolbar-sticky {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
+    #111b29;
+  border-color: rgba(120, 170, 208, 0.15);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.03),
+    0 16px 30px rgba(0, 0, 0, 0.26);
 }
 
 body[data-theme="dark"] .editor-tool-button,
@@ -1918,12 +2017,18 @@ body[data-theme="dark"] .editor-tool-color {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+body[data-theme="dark"] .editor-tool-icon {
+  background: rgba(86, 209, 238, 0.1);
+  color: #d9edf6;
+}
+
 body[data-theme="dark"] .editor-tool-button:hover,
 body[data-theme="dark"] .editor-tool-button:focus-visible {
   background: rgba(86, 209, 238, 0.12);
   color: var(--text);
 }
 
+body[data-theme="dark"] .editor-tool-label,
 body[data-theme="dark"] .editor-tool-select select {
   color: #eef6fb;
 }
@@ -1936,7 +2041,11 @@ body[data-theme="dark"] .writer-editor {
 body[data-theme="dark"] .writer-editor-shell {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 22px 42px rgba(0, 0, 0, 0.24);
+    0 26px 46px rgba(0, 0, 0, 0.28);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015)),
+    #111b29;
+  border-color: rgba(120, 170, 208, 0.15);
 }
 
 body[data-theme="dark"] .writer-editor:empty::before {
@@ -2792,6 +2901,13 @@ body[data-theme="dark"] .detail-summary {
 
 .mcq-builder {
   margin-top: 6px;
+}
+
+#editorInterviewFields[hidden],
+#articleOnlyFields[hidden],
+#editorTemplateTools[hidden],
+#postCodeField[hidden] {
+  display: none !important;
 }
 
 .mcq-builder .section-heading {

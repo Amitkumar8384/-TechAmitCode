@@ -709,7 +709,7 @@ function applyInlineFormatting(text) {
 
 function formatBody(detail) {
   if (typeof detail === "string") {
-    return detail.trim() || "<p>Start writing to build the article body.</p>";
+    return sanitizeEditorHtml(detail).trim() || "<p>Start writing to build the article body.</p>";
   }
 
   const blocks = Array.isArray(detail) ? detail : [];
@@ -766,12 +766,200 @@ function createTempContentRoot(html = "") {
   return container;
 }
 
+function sanitizeUrl(value, options = {}) {
+  const { allowHash = false, allowImageData = false } = options;
+  const url = String(value || "").trim();
+  if (!url) {
+    return "";
+  }
+
+  if (allowHash && url.startsWith("#")) {
+    return url;
+  }
+
+  if (/^https?:\/\//i.test(url)) {
+    return url;
+  }
+
+  if (allowImageData && /^data:image\/(?:png|jpeg|jpg|gif|webp|svg\+xml);base64,[a-z0-9+/=]+$/i.test(url)) {
+    return url;
+  }
+
+  return "";
+}
+
+function sanitizeInlineStyle(styleText = "") {
+  const safeDeclarations = [];
+  const allowedFonts = new Set(["Outfit", "Georgia", "Courier New"]);
+
+  styleText.split(";").forEach((declaration) => {
+    const [property, ...rest] = declaration.split(":");
+    if (!property || !rest.length) {
+      return;
+    }
+
+    const key = property.trim().toLowerCase();
+    const value = rest.join(":").trim();
+    if (!value) {
+      return;
+    }
+
+    if (key === "color" && /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) {
+      safeDeclarations.push(`color: ${value}`);
+      return;
+    }
+
+    if (key === "font-family") {
+      const normalized = value.replace(/["']/g, "").trim();
+      if (allowedFonts.has(normalized)) {
+        safeDeclarations.push(`font-family: '${normalized}'`);
+      }
+    }
+  });
+
+  return safeDeclarations.join("; ");
+}
+
+function sanitizeEditorHtml(html = "") {
+  const root = createTempContentRoot(html);
+  const allowedTags = new Set([
+    "A",
+    "BLOCKQUOTE",
+    "BR",
+    "CODE",
+    "EM",
+    "FIGCAPTION",
+    "FIGURE",
+    "FONT",
+    "H2",
+    "H3",
+    "IMG",
+    "LI",
+    "OL",
+    "P",
+    "SPAN",
+    "STRONG",
+    "UL"
+  ]);
+  const allowedClasses = new Set(["article-image", "rich-accent", "rich-highlight", "rich-serif", "rich-mono"]);
+
+  function sanitizeNode(node) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      return;
+    }
+
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      node.remove();
+      return;
+    }
+
+    const element = node;
+    const tagName = element.tagName.toUpperCase();
+
+    if (!allowedTags.has(tagName)) {
+      const parent = element.parentNode;
+      if (!parent) {
+        element.remove();
+        return;
+      }
+
+      while (element.firstChild) {
+        parent.insertBefore(element.firstChild, element);
+      }
+      element.remove();
+      return;
+    }
+
+    Array.from(element.attributes).forEach((attribute) => {
+      const name = attribute.name.toLowerCase();
+      const value = attribute.value;
+
+      if (name.startsWith("on")) {
+        element.removeAttribute(attribute.name);
+        return;
+      }
+
+      if (name === "class") {
+        const nextClasses = value
+          .split(/\s+/)
+          .map((token) => token.trim())
+          .filter((token) => allowedClasses.has(token));
+        if (nextClasses.length) {
+          element.className = nextClasses.join(" ");
+        } else {
+          element.removeAttribute("class");
+        }
+        return;
+      }
+
+      if (name === "style") {
+        const safeStyle = sanitizeInlineStyle(value);
+        if (safeStyle) {
+          element.setAttribute("style", safeStyle);
+        } else {
+          element.removeAttribute("style");
+        }
+        return;
+      }
+
+      if (tagName === "A" && name === "href") {
+        const safeHref = sanitizeUrl(value, { allowHash: true });
+        if (safeHref) {
+          element.setAttribute("href", safeHref);
+          element.setAttribute("target", "_blank");
+          element.setAttribute("rel", "noreferrer");
+        } else {
+          element.removeAttribute("href");
+        }
+        return;
+      }
+
+      if (tagName === "IMG" && name === "src") {
+        const safeSrc = sanitizeUrl(value, { allowImageData: true });
+        if (safeSrc) {
+          element.setAttribute("src", safeSrc);
+        } else {
+          element.remove();
+        }
+        return;
+      }
+
+      if ((tagName === "IMG" || tagName === "A") && name === "alt") {
+        return;
+      }
+
+      if (tagName === "FONT" && name === "face") {
+        if (!["Outfit", "Georgia", "Courier New"].includes(value)) {
+          element.removeAttribute("face");
+        }
+        return;
+      }
+
+      if (tagName === "FONT" && name === "color") {
+        if (!/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value)) {
+          element.removeAttribute("color");
+        }
+        return;
+      }
+
+      if (!["alt", "href", "rel", "src", "target", "style", "face", "color"].includes(name)) {
+        element.removeAttribute(attribute.name);
+      }
+    });
+
+    Array.from(element.childNodes).forEach(sanitizeNode);
+  }
+
+  Array.from(root.childNodes).forEach(sanitizeNode);
+  return root.innerHTML.trim();
+}
+
 function extractPlainTextFromHtml(html = "") {
-  return createTempContentRoot(html).textContent?.trim() || "";
+  return createTempContentRoot(sanitizeEditorHtml(html)).textContent?.trim() || "";
 }
 
 function htmlToParagraphArray(html = "") {
-  const root = createTempContentRoot(html);
+  const root = createTempContentRoot(sanitizeEditorHtml(html));
   const blockSelectors = "h2, h3, p, li, blockquote, figcaption";
   const blocks = Array.from(root.querySelectorAll(blockSelectors))
     .map((node) => node.textContent?.trim() || "")
@@ -1781,6 +1969,8 @@ function setupEditor() {
   const previewTags = document.getElementById("previewTags");
   const previewContent = document.getElementById("previewContent");
   const previewCode = document.getElementById("previewCode");
+  const previewChecklist = document.getElementById("previewChecklist");
+  const previewChecklistTitle = document.getElementById("previewChecklistTitle");
   const contentEditor = document.getElementById("postContentEditor");
   const modeBadge = document.getElementById("editorModeBadge");
   const previewWordCount = document.getElementById("previewWordCount");
@@ -1789,7 +1979,19 @@ function setupEditor() {
   const toolbarButtons = Array.from(document.querySelectorAll("[data-editor-tool]"));
   const fontSelect = document.getElementById("editorFontSelect");
   const colorInput = document.getElementById("editorColorInput");
+  const imageUploadInput = document.getElementById("editorImageUpload");
   const editorInterviewFields = document.getElementById("editorInterviewFields");
+  const titleLabel = document.getElementById("postTitleLabel");
+  const readTimeLabel = document.getElementById("postReadTimeLabel");
+  const tagsLabel = document.getElementById("postTagsLabel");
+  const excerptLabel = document.getElementById("postExcerptLabel");
+  const bodyEyebrow = document.getElementById("editorBodyEyebrow");
+  const bodyHeading = document.getElementById("editorBodyHeading");
+  const contentLabel = document.getElementById("postContentLabel");
+  const articleOnlyFields = document.getElementById("articleOnlyFields");
+  const codeField = document.getElementById("postCodeField");
+  const codeLabel = document.getElementById("postCodeLabel");
+  const templateTools = document.getElementById("editorTemplateTools");
   const companiesInput = document.getElementById("postCompaniesInput");
   const levelInput = document.getElementById("postLevelInput");
   const optionAInput = document.getElementById("postOptionAInput");
@@ -1827,6 +2029,7 @@ function setupEditor() {
   };
   let editingContext = null;
   let autosaveTimer = 0;
+  let savedSelection = null;
 
   function getInterviewOptionsFromEditor() {
     return [
@@ -1841,15 +2044,83 @@ function setupEditor() {
     const isInterview = fields.type.value === "interview";
     if (editorInterviewFields) {
       editorInterviewFields.hidden = !isInterview;
+      editorInterviewFields.style.display = isInterview ? "" : "none";
+    }
+    if (articleOnlyFields) {
+      articleOnlyFields.hidden = isInterview;
+      articleOnlyFields.style.display = isInterview ? "none" : "";
     }
     Object.values(interviewFields).forEach((field) => {
       if (field) {
         field.disabled = !isInterview;
       }
     });
+    if (fields.readTime) {
+      fields.readTime.disabled = isInterview;
+      fields.readTime.required = !isInterview;
+    }
+    if (fields.tags) {
+      fields.tags.disabled = isInterview;
+    }
+    if (fields.excerpt) {
+      fields.excerpt.disabled = isInterview;
+      fields.excerpt.required = !isInterview;
+    }
+    if (titleLabel) {
+      titleLabel.textContent = isInterview ? "Question" : "Title";
+    }
+    if (readTimeLabel) {
+      readTimeLabel.textContent = isInterview ? "Read time" : "Read time";
+    }
+    if (tagsLabel) {
+      tagsLabel.textContent = isInterview ? "Topics / tags" : "Tags";
+    }
+    if (excerptLabel) {
+      excerptLabel.textContent = isInterview ? "Question summary" : "Excerpt";
+    }
+    if (bodyEyebrow) {
+      bodyEyebrow.textContent = isInterview ? "Answer" : "Body";
+    }
+    if (bodyHeading) {
+      bodyHeading.textContent = isInterview ? "Write the model answer" : "Write the main post";
+    }
+    if (contentLabel) {
+      contentLabel.textContent = isInterview ? "Answer content" : "Main content";
+    }
+    if (templateTools) {
+      templateTools.hidden = isInterview;
+      templateTools.style.display = isInterview ? "none" : "";
+    }
+    if (codeLabel) {
+      codeLabel.textContent = isInterview ? "Code example (optional)" : "Code example";
+    }
+    if (codeField) {
+      codeField.hidden = isInterview;
+      codeField.style.display = isInterview ? "none" : "";
+    }
+    if (fields.title) {
+      fields.title.placeholder = isInterview
+        ? "Example: What is event delegation in JavaScript?"
+        : "Example: How I built a reusable card system";
+    }
+    if (fields.excerpt) {
+      fields.excerpt.placeholder = isInterview
+        ? "Write a short prompt or what the interviewer expects."
+        : "Write a sharp summary for cards, previews, and readers.";
+    }
+    if (contentEditor) {
+      contentEditor.dataset.placeholder = isInterview
+        ? "Write the ideal answer clearly, then add one example or common interview follow-up."
+        : "Open with a strong setup, build the idea clearly, then close with the practical takeaway.";
+    }
+    if (fields.code) {
+      fields.code.placeholder = isInterview
+        ? "Optional code example for the answer"
+        : "Optional code snippet";
+    }
     if (helper) {
       helper.textContent = isInterview
-        ? "Interview mode supports normal answers and real MCQ questions with options plus the correct answer."
+        ? "Question mode me title question hoga, main content answer hoga, aur niche MCQ options optional rahenge."
         : "Use note mode for revision-style content and blog mode for longer explanation articles.";
     }
   }
@@ -1872,9 +2143,9 @@ function setupEditor() {
   }
 
   function getEditorHtml() {
-    return (contentEditor?.innerHTML || "")
+    return sanitizeEditorHtml((contentEditor?.innerHTML || "")
       .replace(/<div><br><\/div>/g, "<p><br></p>")
-      .trim();
+      .trim());
   }
 
   function syncEditorField() {
@@ -1888,20 +2159,24 @@ function setupEditor() {
       return;
     }
 
-    contentEditor.innerHTML = (html || "").trim();
+    contentEditor.innerHTML = sanitizeEditorHtml((html || "").trim());
     syncEditorField();
   }
 
   function getDraftValue() {
     const html = getEditorHtml();
     const options = getInterviewOptionsFromEditor();
+    const plainText = extractPlainTextFromHtml(html);
+    const fallbackInterviewExcerpt = plainText
+      ? `${plainText.slice(0, 140)}${plainText.length > 140 ? "..." : ""}`
+      : "";
     return {
       type: fields.type.value,
       title: fields.title.value.trim(),
       category: fields.category.value,
-      readTime: fields.readTime.value.trim(),
+      readTime: fields.type.value === "interview" ? "" : fields.readTime.value.trim(),
       tags: fields.tags.value.split(",").map((tag) => tag.trim()).filter(Boolean),
-      excerpt: fields.excerpt.value.trim(),
+      excerpt: fields.type.value === "interview" ? fallbackInterviewExcerpt : fields.excerpt.value.trim(),
       content: html,
       code: fields.code.value.trim(),
       companies: interviewFields.companies?.value.split(",").map((company) => company.trim()).filter(Boolean) || [],
@@ -1973,13 +2248,37 @@ function setupEditor() {
       ? plainText.split(/\s+/).map((word) => word.trim()).filter(Boolean).length
       : 0;
     previewTitle.textContent = draft.title || "Untitled post";
-    previewMeta.textContent = draft.category && draft.readTime ? `${draft.type} - ${draft.category} - ${draft.readTime}` : typeLabel;
+    previewMeta.textContent = draft.type === "interview"
+      ? [draft.category, draft.level].filter(Boolean).join(" - ") || "Interview question"
+      : draft.category && draft.readTime ? `${draft.type} - ${draft.category} - ${draft.readTime}` : typeLabel;
     previewExcerpt.textContent = draft.excerpt || "Your excerpt will appear here.";
     previewTags.innerHTML = draft.tags.length ? draft.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("") : "";
     previewContent.innerHTML = draft.content
       ? `${draft.type === "interview" && draft.options.length ? renderInterviewOptions(draft.options, draft.correctOption) : ""}${formatBody(draft.content)}`
       : "<p>Start typing to preview your article body.</p>";
-    previewCode.textContent = draft.code || "Optional code example preview";
+    if (previewCode) {
+      const showCodePreview = draft.type !== "interview" && Boolean(draft.code);
+      previewCode.hidden = !showCodePreview;
+      previewCode.textContent = draft.code || "Optional code example preview";
+    }
+    if (previewChecklistTitle) {
+      previewChecklistTitle.textContent = draft.type === "interview" ? "Question checklist" : "Publishing checklist";
+    }
+    if (previewChecklist) {
+      previewChecklist.innerHTML = draft.type === "interview"
+        ? `
+          <li>Write a clear interview question title</li>
+          <li>Add a direct answer in the answer section</li>
+          <li>Fill MCQ options only if this should be a quiz question</li>
+          <li>Select the correct option before publishing an MCQ</li>
+        `
+        : `
+          <li>Add a title that reads like a finished post</li>
+          <li>Write a short excerpt for cards and previews</li>
+          <li>Use tags so the post is easier to find later</li>
+          <li>Include code only when it clarifies the idea</li>
+        `;
+    }
     if (modeBadge) {
       modeBadge.textContent = modeBadgeMap[draft.type] || "Draft mode";
     }
@@ -1993,7 +2292,7 @@ function setupEditor() {
       helper.textContent = draft.type === "note"
         ? "Note mode is ideal for revision bullets, key definitions, and quick recall summaries."
         : draft.type === "interview"
-          ? "Interview mode turns the title into the question and the main content into the model answer."
+          ? "Question mode turns the title into the question and the main content into the model answer."
           : "Blog mode works best for longer explanations, walkthroughs, and reflection-based writing.";
     }
   }
@@ -2079,13 +2378,192 @@ function setupEditor() {
     contentEditor.focus();
   }
 
+  function isRangeInsideEditor(range) {
+    if (!contentEditor || !range) {
+      return false;
+    }
+
+    const ancestor = range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
+      ? range.commonAncestorContainer
+      : range.commonAncestorContainer.parentNode;
+    return Boolean(ancestor && contentEditor.contains(ancestor));
+  }
+
+  function captureEditorSelection() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (isRangeInsideEditor(range)) {
+      savedSelection = range.cloneRange();
+    }
+  }
+
+  function restoreEditorSelection() {
+    if (!contentEditor) {
+      return false;
+    }
+
+    contentEditor.focus();
+    const selection = window.getSelection();
+    if (!selection) {
+      return false;
+    }
+
+    if (savedSelection && isRangeInsideEditor(savedSelection)) {
+      selection.removeAllRanges();
+      selection.addRange(savedSelection);
+      return true;
+    }
+
+    const range = document.createRange();
+    range.selectNodeContents(contentEditor);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    savedSelection = range.cloneRange();
+    return true;
+  }
+
+  function getSelectedText() {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return "";
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!isRangeInsideEditor(range)) {
+      return "";
+    }
+
+    return selection.toString().trim();
+  }
+
+  function getEditorRange() {
+    restoreEditorSelection();
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) {
+      return null;
+    }
+
+    const range = selection.getRangeAt(0);
+    return isRangeInsideEditor(range) ? range : null;
+  }
+
+  function placeCaretAfter(node) {
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    const range = document.createRange();
+    range.setStartAfter(node);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    savedSelection = range.cloneRange();
+  }
+
+  function insertNodeAtSelection(node) {
+    const range = getEditorRange();
+    if (!range) {
+      return false;
+    }
+
+    range.deleteContents();
+    range.insertNode(node);
+    placeCaretAfter(node);
+    syncEditorField();
+    updatePreview();
+    return true;
+  }
+
+  function insertImageFigure(src, altText = "") {
+    const figure = document.createElement("figure");
+    figure.className = "article-image";
+    const image = document.createElement("img");
+    image.src = src;
+    image.alt = altText || "Article image";
+    figure.append(image);
+    if (altText) {
+      const caption = document.createElement("figcaption");
+      caption.textContent = altText;
+      figure.append(caption);
+    }
+    insertNodeAtSelection(figure);
+  }
+
+  function openLocalImagePicker() {
+    if (imageUploadInput) {
+      imageUploadInput.value = "";
+      imageUploadInput.click();
+    }
+  }
+
+  function wrapSelectionWithInline(className, fallbackText) {
+    const range = getEditorRange();
+    if (!range) {
+      return;
+    }
+
+    if (range.collapsed) {
+      const text = fallbackText || "";
+      if (!text) {
+        return;
+      }
+      const span = document.createElement("span");
+      span.className = className;
+      span.textContent = text;
+      insertNodeAtSelection(span);
+      return;
+    }
+
+    const span = document.createElement("span");
+    span.className = className;
+    span.append(range.extractContents());
+    range.insertNode(span);
+    placeCaretAfter(span);
+    syncEditorField();
+    updatePreview();
+  }
+
+  function insertCodeAtSelection() {
+    const range = getEditorRange();
+    if (!range) {
+      return;
+    }
+
+    if (range.collapsed) {
+      const text = window.prompt("Enter the code text", "const answer = 42;");
+      if (!text) {
+        return;
+      }
+      const span = document.createElement("span");
+      span.className = "rich-mono";
+      span.textContent = text;
+      insertNodeAtSelection(span);
+      return;
+    }
+
+    const span = document.createElement("span");
+    span.className = "rich-mono";
+    span.append(range.extractContents());
+    range.insertNode(span);
+    placeCaretAfter(span);
+    syncEditorField();
+    updatePreview();
+  }
+
   function insertHtmlAtCursor(html) {
     if (!contentEditor) {
       return;
     }
 
-    contentEditor.focus();
+    restoreEditorSelection();
     document.execCommand("insertHTML", false, html);
+    captureEditorSelection();
     syncEditorField();
     updatePreview();
   }
@@ -2095,7 +2573,7 @@ function setupEditor() {
       return;
     }
 
-    contentEditor.focus();
+    restoreEditorSelection();
 
     switch (tool) {
       case "bold":
@@ -2118,37 +2596,69 @@ function setupEditor() {
         break;
       case "link":
         {
+          const range = getEditorRange();
+          if (!range) {
+            break;
+          }
           const url = window.prompt("Enter the link URL", "https://example.com");
-          if (url) {
-            document.execCommand("createLink", false, url);
+          const safeUrl = sanitizeUrl(url, { allowHash: true });
+          if (safeUrl) {
+            if (!range.collapsed) {
+              const anchor = document.createElement("a");
+              anchor.href = safeUrl;
+              anchor.target = "_blank";
+              anchor.rel = "noreferrer";
+              anchor.append(range.extractContents());
+              range.insertNode(anchor);
+              placeCaretAfter(anchor);
+              syncEditorField();
+              updatePreview();
+            } else {
+              const label = window.prompt("Enter the link text", "Read more");
+              if (label) {
+                const anchor = document.createElement("a");
+                anchor.href = safeUrl;
+                anchor.target = "_blank";
+                anchor.rel = "noreferrer";
+                anchor.textContent = label;
+                insertNodeAtSelection(anchor);
+              }
+            }
           }
         }
         break;
       case "image":
         {
-          const url = window.prompt("Paste the image URL", "https://images.example.com/photo.jpg");
-          const alt = window.prompt("Add a short caption", "Article image");
-          if (url) {
-            insertHtmlAtCursor(`<figure class="article-image"><img src="${url}" alt="${escapeHtml(alt || "Article image")}">${alt ? `<figcaption>${escapeHtml(alt)}</figcaption>` : ""}</figure>`);
+          const useLocal = window.confirm("Local image import karna hai? OK = local file, Cancel = image URL");
+          if (useLocal) {
+            openLocalImagePicker();
+          } else {
+            const url = window.prompt("Paste the image URL", "https://images.example.com/photo.jpg");
+            const alt = window.prompt("Add a short caption", "Article image");
+            const safeUrl = sanitizeUrl(url);
+            if (safeUrl) {
+              insertImageFigure(safeUrl, alt || "");
+            }
           }
         }
         break;
       case "accent":
-        insertHtmlAtCursor("<span class=\"rich-accent\">Accent text</span>");
+        wrapSelectionWithInline("rich-accent", "Accent text");
         break;
       case "highlight":
-        insertHtmlAtCursor("<span class=\"rich-highlight\">Highlighted text</span>");
+        wrapSelectionWithInline("rich-highlight", "Highlighted text");
         break;
       case "serif":
-        insertHtmlAtCursor("<span class=\"rich-serif\">Editorial text</span>");
+        wrapSelectionWithInline("rich-serif", "Editorial text");
         break;
       case "mono":
-        insertHtmlAtCursor("<span class=\"rich-mono\">Command or code</span>");
+        insertCodeAtSelection();
         break;
       default:
         break;
     }
 
+    captureEditorSelection();
     syncEditorField();
     updatePreview();
   }
@@ -2182,10 +2692,15 @@ function setupEditor() {
   });
 
   if (contentEditor) {
+    document.addEventListener("selectionchange", captureEditorSelection);
+    ["keyup", "mouseup", "focus", "blur"].forEach((eventName) => {
+      contentEditor.addEventListener(eventName, captureEditorSelection);
+    });
     contentEditor.addEventListener("input", () => {
       syncEditorField();
       updatePreview();
       scheduleAutosave();
+      captureEditorSelection();
     });
   }
 
@@ -2213,6 +2728,10 @@ function setupEditor() {
   }
 
   toolbarButtons.forEach((button) => {
+    button.addEventListener("mousedown", (event) => {
+      event.preventDefault();
+      restoreEditorSelection();
+    });
     button.addEventListener("click", () => {
       applyEditorTool(button.dataset.editorTool || "");
     });
@@ -2221,8 +2740,9 @@ function setupEditor() {
   if (fontSelect) {
     fontSelect.addEventListener("change", () => {
       if (fontSelect.value && contentEditor) {
-        contentEditor.focus();
+        restoreEditorSelection();
         document.execCommand("fontName", false, fontSelect.value);
+        captureEditorSelection();
         syncEditorField();
         updatePreview();
       }
@@ -2232,11 +2752,45 @@ function setupEditor() {
   if (colorInput) {
     colorInput.addEventListener("input", () => {
       if (contentEditor) {
-        contentEditor.focus();
+        restoreEditorSelection();
         document.execCommand("foreColor", false, colorInput.value);
+        captureEditorSelection();
         syncEditorField();
         updatePreview();
       }
+    });
+  }
+
+  if (imageUploadInput) {
+    imageUploadInput.addEventListener("change", () => {
+      const file = imageUploadInput.files?.[0];
+      if (!file) {
+        return;
+      }
+
+      if (!file.type.startsWith("image/")) {
+        setInlineMessage(message, "Please choose a valid image file.", "error");
+        return;
+      }
+
+      const reader = new FileReader();
+      const altText = window.prompt("Add a short caption", file.name.replace(/\.[^.]+$/, "")) || "";
+      reader.addEventListener("load", () => {
+        const result = typeof reader.result === "string"
+          ? sanitizeUrl(reader.result, { allowImageData: true })
+          : "";
+        if (!result) {
+          setInlineMessage(message, "This image could not be imported.", "error");
+          return;
+        }
+
+        insertImageFigure(result, altText);
+        setInlineMessage(message, "Local image inserted into the editor.", "success");
+      });
+      reader.addEventListener("error", () => {
+        setInlineMessage(message, "Image import failed on this device.", "error");
+      });
+      reader.readAsDataURL(file);
     });
   }
 
@@ -2253,6 +2807,11 @@ function setupEditor() {
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const draft = getDraftValue();
+    const isEditing = Boolean(editingContext);
+    if (!extractPlainTextFromHtml(draft.content)) {
+      setInlineMessage(message, "Main content likho before publishing.", "error");
+      return;
+    }
     if (draft.type === "interview" && draft.options.length && !draft.correctOption) {
       setInlineMessage(message, "Select the correct option before publishing the MCQ question.", "error");
       return;
@@ -2292,7 +2851,7 @@ function setupEditor() {
     editingContext = { slug: post.slug, type: post.type };
     saveJson(STORAGE_KEYS.draft, { ...draft, slug: post.slug, status: "published", editing: editingContext });
     renderLocalPosts();
-    setInlineMessage(message, editingContext
+    setInlineMessage(message, isEditing
       ? "Local resource updated successfully."
       : draft.type === "note"
         ? "Note published into the local notes workflow."
@@ -2405,7 +2964,15 @@ function setupDetailPage() {
     code.textContent = item.code;
   }
 
-  backLink.href = item.type === "blog" ? "blog.html" : `${item.type}s.html`;
+  const backLinkMap = {
+    blog: "blog.html",
+    note: "notes.html",
+    tutorial: "tutorials.html",
+    project: "projects.html",
+    cheatsheet: "cheatsheets.html",
+    interview: "interview.html"
+  };
+  backLink.href = backLinkMap[item.type] || "blog.html";
 
   const relatedPool = getContentCollections()[item.type] || [];
   relatedList.innerHTML = relatedPool
@@ -2415,7 +2982,7 @@ function setupDetailPage() {
     .join("");
 
   setupBookmark(item, bookmarkButton);
-  setupComments(item.slug);
+  setupComments(item);
 
   if (detailSecondaryButton) {
     detailSecondaryButton.hidden = !(item.type === "note" || item.type === "cheatsheet");
@@ -2496,19 +3063,21 @@ function setupBookmark(item, button) {
   render();
 }
 
-function setupComments(slug) {
+function setupComments(item) {
   const form = document.getElementById("commentForm");
   const list = document.getElementById("commentList");
   const message = document.getElementById("commentMessage");
   const nameInput = document.getElementById("commentName");
   const textInput = document.getElementById("commentText");
+  const commentKey = `${item.type}:${item.slug}`;
 
   if (!form || !list || !message || !nameInput || !textInput) {
     return;
   }
 
   function render() {
-    const comments = getComments()[slug] || [];
+    const allComments = getComments();
+    const comments = allComments[commentKey] || allComments[item.slug] || [];
     list.innerHTML = comments.length
       ? comments.map((comment) => `
           <article class="comment-item">
@@ -2535,9 +3104,12 @@ function setupComments(slug) {
     }
 
     const allComments = getComments();
-    const comments = allComments[slug] || [];
+    const comments = allComments[commentKey] || allComments[item.slug] || [];
     comments.unshift({ name, text });
-    allComments[slug] = comments;
+    allComments[commentKey] = comments;
+    if (item.slug in allComments && item.slug !== commentKey) {
+      delete allComments[item.slug];
+    }
     const saved = saveJson(STORAGE_KEYS.comments, allComments);
     if (!saved) {
       setInlineMessage(message, "Unable to save the comment on this device right now.", "error");
