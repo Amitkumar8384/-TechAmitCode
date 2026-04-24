@@ -44,6 +44,7 @@
       <div class="nav-drawer">
         <nav class="site-nav" id="siteNav" aria-label="Primary">
           <a class="nav-link" href="index.html" data-nav="home">Home</a>
+          <a class="nav-link" href="subjects.html" data-nav="subjects">Subjects</a>
           <div class="nav-group" data-nav-group="learn">
             <button class="nav-parent" type="button" data-nav-parent="learn" aria-expanded="false">
               <span>Learn</span>
@@ -152,6 +153,26 @@
                   </select>
                 </label>
               </div>
+
+              <div class="field-grid">
+                <label>
+                  <span>Subject</span>
+                  <select id="postSubjectInput" name="subjectId">
+                    <option value="">Unassigned</option>
+                  </select>
+                </label>
+                <label>
+                  <span>Chapter</span>
+                  <select id="postChapterInput" name="chapterId">
+                    <option value="">No chapter</option>
+                  </select>
+                </label>
+              </div>
+
+              <label>
+                <span>New chapter name</span>
+                <input type="text" id="postChapterTitleInput" name="chapterTitle" placeholder="Example: Tenses Basics">
+              </label>
 
               <label class="editor-title-field">
                 <span id="postTitleLabel">Title</span>

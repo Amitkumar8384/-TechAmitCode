@@ -46,6 +46,7 @@
       <div class="nav-drawer">
         <nav class="site-nav" id="siteNav" aria-label="Primary">
           <a class="nav-link" href="index.html" data-nav="home">Home</a>
+          <a class="nav-link" href="subjects.html" data-nav="subjects">Subjects</a>
           <div class="nav-group" data-nav-group="learn">
             <button class="nav-parent" type="button" data-nav-parent="learn" aria-expanded="false">
               <span>Learn</span>
@@ -147,6 +148,20 @@
             </div>
             <div class="field-grid">
               <label>
+                <span>Subject</span>
+                <select id="adminSubjectInput">
+                  <option value="">Unassigned</option>
+                </select>
+              </label>
+              <label>
+                <span>Chapter</span>
+                <select id="adminChapterInput">
+                  <option value="">No chapter</option>
+                </select>
+              </label>
+            </div>
+            <div class="field-grid">
+              <label>
                 <span>Category</span>
                 <input id="adminCategoryInput" type="text" placeholder="JavaScript" required>
               </label>
@@ -224,6 +239,68 @@
             </div>
           </form>
           <p class="form-message" id="adminEntryMessage" aria-live="polite"></p>
+        </article>
+      </section>
+
+      <section class="dashboard-grid" id="subjectStudio">
+        <article class="surface dashboard-panel">
+          <p class="eyebrow">Subject studio</p>
+          <h2>Create subject</h2>
+          <form class="editor-form" id="subjectForm">
+            <label>
+              <span>Subject id</span>
+              <input id="subjectIdInput" type="text" placeholder="frontend-foundations">
+            </label>
+            <label>
+              <span>Name</span>
+              <input id="subjectNameInput" type="text" placeholder="Frontend Foundations" required>
+            </label>
+            <label>
+              <span>Description</span>
+              <textarea id="subjectDescriptionInput" rows="4" placeholder="Describe the learning path." required></textarea>
+            </label>
+            <label>
+              <span>Icon / label</span>
+              <input id="subjectIconInput" type="text" placeholder="JS, React, Layout">
+            </label>
+            <button class="button" type="submit">Create New Subject</button>
+          </form>
+          <p class="form-message" id="subjectMessage" aria-live="polite"></p>
+          <div class="resource-list" id="adminSubjectList"></div>
+        </article>
+
+        <article class="surface dashboard-panel">
+          <p class="eyebrow">Chapter studio</p>
+          <h2>Create chapter</h2>
+          <form class="editor-form" id="chapterForm">
+            <label>
+              <span>Chapter id</span>
+              <input id="chapterIdInput" type="text" placeholder="dom-state-patterns">
+            </label>
+            <label>
+              <span>Subject</span>
+              <select id="chapterSubjectInput" required>
+                <option value="">Select subject</option>
+              </select>
+            </label>
+            <div class="field-grid">
+              <label>
+                <span>Title</span>
+                <input id="chapterTitleInput" type="text" placeholder="DOM State Patterns" required>
+              </label>
+              <label>
+                <span>Order</span>
+                <input id="chapterOrderInput" type="number" min="1" value="1" required>
+              </label>
+            </div>
+            <label>
+              <span>Description</span>
+              <textarea id="chapterDescriptionInput" rows="4" placeholder="Describe what this chapter teaches." required></textarea>
+            </label>
+            <button class="button" type="submit">Create Chapter</button>
+          </form>
+          <p class="form-message" id="chapterMessage" aria-live="polite"></p>
+          <div class="resource-list" id="adminChapterList"></div>
         </article>
       </section>
 

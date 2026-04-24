@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TechAmitCode | Content Detail</title>
-  <meta name="description" content="Read full tutorials, project breakdowns, and blog posts on TechAmitCode.">
+  <title>TechAmitCode | Chapter</title>
+  <meta name="description" content="Study a guided chapter with notes, tutorials, cheat sheets, and practice inside TechAmitCode.">
   <meta name="color-scheme" content="light dark">
   <meta name="theme-color" content="#0f7c90">
   <meta property="og:site_name" content="TechAmitCode">
-  <meta property="og:title" content="TechAmitCode | Content Detail">
-  <meta property="og:description" content="Read full tutorials, project breakdowns, and blog posts on TechAmitCode.">
+  <meta property="og:title" content="TechAmitCode | Chapter">
+  <meta property="og:description" content="Study a guided chapter with notes, tutorials, cheat sheets, and practice inside TechAmitCode.">
   <meta property="og:type" content="article">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -21,7 +21,7 @@
   >
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body data-page="content">
+<body data-page="chapter">
   <div class="site-shell">
     <header class="site-header">
       <a class="brand" href="index.html">
@@ -77,75 +77,126 @@
           <button class="button global-search-submit" type="submit">Search</button>
         </form>
         <div class="header-actions">
-          <a class="button button-ghost" id="detailBackLink" href="blog.html">Back to listing</a>
+          <a class="button button-ghost" href="subjects.html">All Subjects</a>
           <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Theme</button>
         </div>
       </div>
     </header>
 
     <main class="section">
-      <article class="detail-layout detail-experience" id="detailContainer">
+      <nav class="breadcrumb" id="chapterBreadcrumb" aria-label="Breadcrumb"></nav>
+
+      <article class="detail-layout detail-experience">
         <section class="surface detail-main detail-main-premium">
           <div class="detail-meta">
-            <p class="eyebrow" id="detailType">Content</p>
+            <p class="eyebrow">Chapter</p>
             <div class="detail-actions">
-              <button class="button button-ghost button-small" id="detailActionButton" type="button" hidden>Mark Studied</button>
-              <button class="button button-ghost button-small" id="detailSecondaryButton" type="button" hidden>Print / Save PDF</button>
-              <button class="bookmark-button" id="bookmarkButton" type="button">Save</button>
+              <button class="button button-ghost button-small" id="chapterCompleteButton" type="button">Mark as Completed</button>
+              <button class="bookmark-button" id="chapterBookmarkButton" type="button">Bookmark Chapter</button>
             </div>
           </div>
           <div class="detail-hero-copy">
-            <h1 id="detailTitle">Loading content...</h1>
-            <p class="detail-summary" id="detailExcerpt"></p>
+            <h1 id="chapterTitle">Loading chapter...</h1>
+            <p class="detail-summary" id="chapterDescription"></p>
           </div>
           <div class="detail-meta-stack">
-            <div class="meta-row" id="detailMetaRow"></div>
-            <div class="tag-row" id="detailTags"></div>
+            <div class="meta-row" id="chapterMeta"></div>
           </div>
           <div class="detail-reading-shell">
-            <div class="article-body" id="detailBody"></div>
+            <div class="stack-sm" id="chapterNotes"></div>
           </div>
-          <pre class="code-block" id="detailCode" hidden></pre>
-          <p class="form-message" id="detailMessage" aria-live="polite"></p>
         </section>
 
         <aside class="detail-side detail-side-premium">
           <section class="surface detail-side-card">
-            <p class="eyebrow">Continue exploring</p>
-            <h3 id="relatedTitle">Related resources</h3>
-            <div class="related-list" id="relatedList"></div>
+            <p class="eyebrow">Inside this chapter</p>
+            <div class="chapter-outline" id="chapterOutline"></div>
           </section>
           <section class="surface detail-side-card">
-            <p class="eyebrow">Learning context</p>
-            <div class="stack-sm" id="detailContextNote">
-              <p>This detail page supports local comments and bookmarks to simulate a production content workflow without a backend.</p>
+            <p class="eyebrow">Support</p>
+            <div class="resource-list" id="chapterTutorials"></div>
+            <div class="stack-sm chapter-side-block" id="chapterCheatsheets"></div>
+          </section>
+          <section class="surface detail-side-card">
+            <p class="eyebrow">Practice snapshot</p>
+            <div class="subject-meta-row" id="chapterPracticeStats"></div>
+          </section>
+          <section class="surface detail-side-card">
+            <p class="eyebrow">Navigation</p>
+            <div class="chapter-nav">
+              <a class="button button-ghost" id="chapterPrevLink" href="subjects.html">Previous</a>
+              <a class="button" id="chapterNextLink" href="subjects.html">Next</a>
             </div>
           </section>
         </aside>
       </article>
 
-      <section class="section section-tight detail-comments-wrap">
-        <div class="surface comments-panel comments-panel-premium">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Discussion</p>
-              <h2>Comments</h2>
-            </div>
-            <div class="status-pill" id="commentCountLabel">0 comments</div>
+      <section class="surface section" id="chapterPracticeSection">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Practice</p>
+            <h2>Chapter practice section</h2>
           </div>
-          <form id="commentForm" class="comment-form">
-            <label>
-              <span>Name</span>
-              <input id="commentName" name="name" type="text" placeholder="Your name" required>
-            </label>
-            <label>
-              <span>Comment</span>
-              <textarea id="commentText" name="comment" rows="4" placeholder="Add something useful to the discussion." required></textarea>
-            </label>
-            <button class="button" type="submit">Post Comment</button>
-          </form>
-          <p class="form-message" id="commentMessage" aria-live="polite"></p>
-          <div class="comment-list" id="commentList"></div>
+        </div>
+
+        <div class="dashboard-grid section-tight">
+          <article class="surface practice-panel">
+            <div class="section-heading section-heading-compact">
+              <div>
+                <p class="eyebrow">Flashcards</p>
+                <h3>Quick memory drills</h3>
+              </div>
+            </div>
+            <div class="flashcard-card" id="chapterFlashcard"></div>
+            <div class="mock-actions" id="chapterFlashcardActions">
+              <button class="button button-ghost" id="chapterFlipFlashcard" type="button">Flip</button>
+              <button class="button" id="chapterNextFlashcard" type="button">Next Card</button>
+            </div>
+          </article>
+
+          <article class="surface practice-panel">
+            <div class="section-heading section-heading-compact">
+              <div>
+                <p class="eyebrow">Quick quiz</p>
+                <h3>3 to 5 self-test questions</h3>
+              </div>
+              <span class="status-pill" id="chapterQuizProgress">Question 1 of 1</span>
+            </div>
+            <div class="mock-card" id="chapterQuizCard"></div>
+            <div class="mock-actions" id="chapterQuizActions">
+              <button class="button button-ghost" id="chapterQuizReveal" type="button">Reveal Answer</button>
+              <button class="button button-ghost" id="chapterQuizWrong" type="button">I Missed This</button>
+              <button class="button" id="chapterQuizCorrect" type="button">I Got This</button>
+            </div>
+            <p class="form-message" id="chapterQuizFeedback" aria-live="polite"></p>
+          </article>
+        </div>
+
+        <div class="section section-tight">
+          <div class="section-heading section-heading-compact">
+            <div>
+              <p class="eyebrow">MCQ</p>
+              <h3>Objective practice</h3>
+            </div>
+          </div>
+          <div class="stack-sm" id="chapterMcq"></div>
+        </div>
+      </section>
+
+      <section class="surface section" id="chapterQuestionsSection">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Questions</p>
+            <h2>Practice questions mapped to this chapter</h2>
+          </div>
+        </div>
+        <div class="question-list" id="chapterQuestions"></div>
+      </section>
+
+      <section class="surface section-tight">
+        <div class="chapter-nav chapter-nav-bottom">
+          <a class="button button-ghost" id="chapterPrevLinkBottom" href="subjects.html">Previous</a>
+          <a class="button" id="chapterNextLinkBottom" href="subjects.html">Next</a>
         </div>
       </section>
     </main>
@@ -157,14 +208,14 @@
             <span class="brand-mark">T</span>
             <span><strong>TechAmitCode</strong><small>Build skills that ship</small></span>
           </a>
-          <p>Open any note, article, project, or cheat sheet and keep your learning workflow connected with bookmarks and comments.</p>
+          <p>Chapter pages combine explanation, quick references, and practice into one guided lesson screen.</p>
         </div>
         <div>
           <p class="footer-heading">Explore</p>
           <div class="footer-links">
+            <a href="subjects.html">Subjects</a>
             <a href="notes.html">Notes</a>
             <a href="tutorials.html">Tutorials</a>
-            <a href="projects.html">Projects</a>
             <a href="blog.html">Blog</a>
           </div>
         </div>
@@ -180,15 +231,15 @@
         <div>
           <p class="footer-heading">Workspace</p>
           <div class="footer-links">
-            <a href="admin.html">Admin Panel</a>
-            <a href="index.html">Home</a>
-            <a href="dashboard.html">Progress Tracker</a>
-            <a href="writing.html">Publish Resource</a>
+            <a href="subjects.html">Subject Paths</a>
+            <a href="admin.html#subjectStudio">Subject Studio</a>
+            <a href="dashboard.html">Progress</a>
+            <a href="search.html">Search</a>
           </div>
         </div>
       </div>
       <div class="footer-bottom">
-        <p>Detail pages support local bookmarking, printing, and discussion for a realistic content flow.</p>
+        <p>Complete chapters, save practice scores, and move to the next lesson with a clearer learning loop.</p>
         <p>TechAmitCode</p>
       </div>
     </footer>

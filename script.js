@@ -3,6 +3,8 @@ const STORAGE_KEYS = {
   newsletter: "techAmitCodeNewsletter",
   draft: "techAmitCodeDraft",
   posts: "techAmitCodePosts",
+  subjects: "techAmitCodeSubjects",
+  chapters: "techAmitCodeChapters",
   profile: "techAmitCodeProfile",
   auth: "techAmitCodeAuth",
   planner: "techAmitCodePlanner",
@@ -10,7 +12,10 @@ const STORAGE_KEYS = {
   bookmarks: "techAmitCodeBookmarks",
   comments: "techAmitCodeComments",
   progress: "techAmitCodeProgress",
-  recent: "techAmitCodeRecent"
+  recent: "techAmitCodeRecent",
+  chapterBookmarks: "techAmitCodeChapterBookmarks",
+  chapterPractice: "techAmitCodeChapterPractice",
+  chapterCompletions: "techAmitCodeChapterCompletions"
 };
 
 let notificationRoot = null;
@@ -376,8 +381,316 @@ const interviewQuestions = [
   }
 ];
 
-function slugify(value) {
-  return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+const builtInSubjects = [
+  {
+    id: "html",
+    name: "HTML",
+    description: "Study semantic structure, accessibility foundations, and interview-first HTML patterns.",
+    icon: "HTML"
+  },
+  {
+    id: "frontend",
+    name: "Frontend",
+    description: "Learn page structure, design systems, and responsive product layouts with real UI workflows.",
+    icon: "UI"
+  },
+  {
+    id: "javascript",
+    name: "JavaScript",
+    description: "Move from DOM events to async thinking with chapter-wise notes, tutorials, and interview practice.",
+    icon: "JS"
+  },
+  {
+    id: "css",
+    name: "CSS",
+    description: "Build layout systems, architecture patterns, and quick-reference visual styling workflows.",
+    icon: "CSS"
+  },
+  {
+    id: "react",
+    name: "React",
+    description: "Study component design, state ownership, and reusable UI composition for interview-ready answers.",
+    icon: "React"
+  },
+  {
+    id: "tools",
+    name: "Tools",
+    description: "Use tooling, Git workflows, and practical utilities that support faster shipping.",
+    icon: "Tools"
+  },
+  {
+    id: "career",
+    name: "Career",
+    description: "Turn learning into better interview answers, writing habits, and long-term developer growth.",
+    icon: "Career"
+  },
+  {
+    id: "english",
+    name: "English",
+    description: "Improve technical communication, explanation style, and learning notes written in clear English.",
+    icon: "English"
+  },
+  {
+    id: "workflow",
+    name: "Workflow",
+    description: "Turn projects into shipping habits with Git, documentation, publishing flow, and product thinking.",
+    icon: "Flow"
+  }
+];
+
+const builtInChapters = [
+  {
+    id: "semantic-layout-basics",
+    subjectId: "html",
+    title: "Semantic Layout Basics",
+    order: 1,
+    description: "Use semantic HTML and foundational layout patterns to create maintainable page structure."
+  },
+  {
+    id: "html-accessibility-foundations",
+    subjectId: "html",
+    title: "HTML Accessibility Foundations",
+    order: 2,
+    description: "Understand labels, landmarks, and meaningful structure for readable and accessible documents."
+  },
+  {
+    id: "responsive-ui-systems",
+    subjectId: "frontend",
+    title: "Responsive UI Systems",
+    order: 2,
+    description: "Build reusable responsive shells with CSS architecture, grid, and flexbox patterns."
+  },
+  {
+    id: "frontend-production-thinking",
+    subjectId: "frontend",
+    title: "Frontend Production Thinking",
+    order: 1,
+    description: "Think in workflows, states, and maintainable page systems rather than isolated screens."
+  },
+  {
+    id: "dom-state-patterns",
+    subjectId: "javascript",
+    title: "DOM State Patterns",
+    order: 1,
+    description: "Model UI state clearly with DOM events, event delegation, and render workflows."
+  },
+  {
+    id: "async-runtime-thinking",
+    subjectId: "javascript",
+    title: "Async Runtime Thinking",
+    order: 2,
+    description: "Understand closures, event loop behavior, and async reasoning for interviews and practical code."
+  },
+  {
+    id: "css-layout-systems",
+    subjectId: "css",
+    title: "CSS Layout Systems",
+    order: 1,
+    description: "Practice flexbox, grid, spacing, and card layout systems that scale cleanly."
+  },
+  {
+    id: "css-architecture-patterns",
+    subjectId: "css",
+    title: "CSS Architecture Patterns",
+    order: 2,
+    description: "Organize styling with tokens, utilities, and component boundaries."
+  },
+  {
+    id: "react-component-thinking",
+    subjectId: "react",
+    title: "React Component Thinking",
+    order: 1,
+    description: "Practice props, state ownership, and composition patterns through reusable component notes."
+  },
+  {
+    id: "react-state-patterns",
+    subjectId: "react",
+    title: "React State Patterns",
+    order: 2,
+    description: "Understand component state, prop flow, and rendering tradeoffs in practical UI code."
+  },
+  {
+    id: "tooling-basics",
+    subjectId: "tools",
+    title: "Tooling Basics",
+    order: 1,
+    description: "Use Git and core developer tools confidently during project work."
+  },
+  {
+    id: "career-learning-loop",
+    subjectId: "career",
+    title: "Career Learning Loop",
+    order: 1,
+    description: "Use writing, documentation, and reflection to improve project outcomes and interviews."
+  },
+  {
+    id: "english-communication-practice",
+    subjectId: "english",
+    title: "English Communication Practice",
+    order: 1,
+    description: "Write and explain technical ideas in simple, interview-friendly English."
+  },
+  {
+    id: "shipping-workflows",
+    subjectId: "workflow",
+    title: "Shipping Workflows",
+    order: 1,
+    description: "Document projects, write after building, and use Git plus publishing workflows to learn faster."
+  }
+];
+
+const builtInChapterLessons = {
+  "semantic-layout-basics": [
+    "Semantic HTML ka main goal styling nahi, meaning dena hota hai. Jab aap `header`, `nav`, `main`, `section`, `article`, aur `footer` use karte ho, page structure clear ho jata hai.",
+    "Readable layout banane ke liye pehle document landmarks decide karo. Har screen me socho user kahan land karega, primary content kya hai, aur supporting content kya hai.",
+    "Achi semantic structure accessibility ko improve karti hai, SEO ko support karti hai, aur future maintenance ko simple banati hai.",
+    "Is chapter ka practical rule: pehle HTML skeleton banao, baad me CSS se decorate karo."
+  ],
+  "html-accessibility-foundations": [
+    "Accessible HTML ka start labels aur landmarks se hota hai. Har form input ka clear label hona chahiye aur har page ka logical heading order hona chahiye.",
+    "Buttons ko buttons hi rehne do aur links ko links. Semantic misuse se keyboard navigation aur screen reader flow dono weak ho jate hain.",
+    "Helpful accessibility ka matlab sirf alt text nahi hota. Error states, focus visibility, readable button text, aur predictable navigation bhi equally important hain.",
+    "Interview answer me hamesha accessibility ko usability aur maintainability ke saath connect karke explain karo."
+  ],
+  "frontend-production-thinking": [
+    "Frontend sirf components banana nahi hota; yeh user workflow ko screen states me translate karna hota hai.",
+    "Har feature ke liye loading, empty, success, aur error state socho. Production thinking wahi se start hoti hai.",
+    "Screen ko sections me break karo: hero, filters, list, sidebar, actions. Isse reusable patterns nikalte hain aur layout drift kam hota hai.",
+    "Achi frontend system wahi hai jo growth ke baad bhi readable aur consistent rahe."
+  ],
+  "responsive-ui-systems": [
+    "Responsive layout banate waqt pehle constraints socho, baad me polish. Mobile collapse kaisa hoga, tablet rearrangement kya hogi, aur desktop density kitni hogi, yeh pehle define karo.",
+    "Grid page structure ke liye strong hota hai, jabki flex local alignment aur row-level distribution ke liye useful hota hai.",
+    "Spacing system random pixel values se better hota hai, kyunki usse layout more consistent aur easier to maintain ho jata hai.",
+    "Is chapter ka outcome: aisa UI jo sirf pretty nahi, balki multiple screen sizes par stable bhi ho."
+  ],
+  "dom-state-patterns": [
+    "DOM state ko clearly manage karne ke liye random click handlers me logic mat chhupao. Ek small state object rakho aur focused render functions banao.",
+    "Event delegation dynamic lists aur repeated UI elements ke liye powerful pattern hai. Parent par listener lagao aur target ko detect karo.",
+    "Search, filter, toggle, selection jaise behaviors ko state updates ki tarah treat karo. Isse debugging easy hoti hai.",
+    "Acha JavaScript workflow tab banta hai jab UI predictable re-render kare aur logic scattered na ho."
+  ],
+  "async-runtime-thinking": [
+    "JavaScript single-threaded call stack par run karta hai, lekin timers, promises, aur browser APIs asynchronous behavior create karte hain.",
+    "Event loop samajhne ka simple rule: synchronous code pehle, microtasks next, aur macrotasks uske baad.",
+    "Closures interview ka favorite topic isliye hain kyunki woh lexical scope aur private state ko practical example ke saath explain karte hain.",
+    "Async reasoning ka real benefit yeh hai ki aap confidently predict kar sako code kis order me run hoga."
+  ],
+  "css-layout-systems": [
+    "CSS layout systems me flexbox aur grid dono important hain, lekin dono ka kaam alag hai. Flex ek dimension me strong hai, grid do dimensions me.",
+    "Common patterns yaad rakho: split row, centered stack, wrapped chips, auto-fit card grid, aur sticky side panel.",
+    "Layout scalable tab banta hai jab spacing, width constraints, aur content growth dono consider kiye gaye hon.",
+    "Cheat sheets helpful hain, lekin real understanding tab aati hai jab aap pattern ko multiple screens par test karte ho."
+  ],
+  "css-architecture-patterns": [
+    "CSS architecture ka goal line count kam karna nahi, balki growth ko manageable banana hota hai.",
+    "Tokens se start karo: color, spacing, radius, typography. Phir utilities aur components ko alag layers me define karo.",
+    "Agar har new component styling ko copy-paste karke start kar raha hai, to architecture weak hai.",
+    "Production CSS tab achha feel hota hai jab naming, spacing, aur variation system-based ho."
+  ],
+  "react-component-thinking": [
+    "React me best components woh hote hain jo ek clear responsibility handle karte hain aur composition ke through grow karte hain.",
+    "Props input hain, state owned changeable data hai. Har component me yeh decide karna important hai ki state kahan live karegi.",
+    "Composition giant prop-heavy components se zyada scalable hoti hai. Reusable wrappers aur slots future changes ko easier banate hain.",
+    "Interview me React explain karte waqt ownership, predictability, aur tradeoffs ka mention strong answer banata hai."
+  ],
+  "react-state-patterns": [
+    "State ko jitna niche rakh sakte ho utna niche rakho, lekin agar multiple children ko same updates chahiye to use lift karo.",
+    "Render behavior ko samajhna important hai: kaunsa state change kis component tree ko affect karega.",
+    "Controlled inputs, derived UI, aur prop flow ko clear rakhna React apps ko maintainable banata hai.",
+    "React state ka real test tab hota hai jab app grow kare aur aapko bugs ke bina predictable updates chahiye hon."
+  ],
+  "tooling-basics": [
+    "Developer tools ka basic confidence project speed ko directly affect karta hai. `git status`, `git diff`, aur branch workflow pe comfort zaroori hai.",
+    "Tooling ka purpose busywork badhana nahi, risk kam karna hota hai. Inspect before change is a strong habit.",
+    "Cheat sheet ya command list tab useful hoti hai jab aap usse real project flow me repeatedly use karte ho.",
+    "Is chapter me aim hai panic ko reduce karna aur day-to-day coding confidence build karna."
+  ],
+  "career-learning-loop": [
+    "Project complete karne ke baad agar aap uske decisions ko likhte ho, to learning much deeper ho jati hai.",
+    "Writing aapko force karti hai ki aap vague understanding ko clear explanation me convert karo.",
+    "Career growth ke liye sirf build karna kaafi nahi; aapko explain, reflect, aur present bhi karna aana chahiye.",
+    "Strong learning loop: build, document, review, publish, and improve."
+  ],
+  "english-communication-practice": [
+    "Technical English ka main goal fancy language nahi, clear explanation hota hai.",
+    "Short sentences, simple verbs, and one idea per paragraph interview aur notes dono me helpful hote hain.",
+    "Achi communication tab dikhti hai jab aap concept ko beginner ko bhi samjha sako aur experienced person ko bhi bore na karo.",
+    "Practice method: ek topic lo, use simple English me explain karo, phir same answer ko tighter version me rewrite karo."
+  ],
+  "shipping-workflows": [
+    "Shipping mindset ka matlab project ko output me convert karna hai, sirf local experiment me chhod dena nahi.",
+    "Acha workflow me planning, implementation, notes, and publishing ka path hota hai. Isi loop se learning durable banti hai.",
+    "Documentation aur writing optional extras nahi hain; yeh project ko reusable asset bana dete hain.",
+    "Is chapter ka focus hai passive learning ko active delivery me badalna."
+  ]
+};
+
+const builtInContentAssignments = {
+  note: {
+    "html-semantic-notes": { subjectId: "html", chapterId: "semantic-layout-basics" },
+    "js-event-loop-notes": { subjectId: "javascript", chapterId: "async-runtime-thinking" },
+    "react-component-notes": { subjectId: "react", chapterId: "react-component-thinking" }
+  },
+  tutorial: {
+    "css-architecture": { subjectId: "css", chapterId: "css-architecture-patterns" },
+    "dom-state-workflow": { subjectId: "javascript", chapterId: "dom-state-patterns" },
+    "responsive-dashboard": { subjectId: "frontend", chapterId: "responsive-ui-systems" }
+  },
+  cheatsheet: {
+    "flexbox-cheatsheet": { subjectId: "css", chapterId: "css-layout-systems" },
+    "grid-cheatsheet": { subjectId: "css", chapterId: "css-layout-systems" },
+    "git-cheatsheet": { subjectId: "tools", chapterId: "tooling-basics" }
+  },
+  interview: {
+    "difference-between-flex-and-grid": { subjectId: "css", chapterId: "css-layout-systems" },
+    "what-is-event-delegation": { subjectId: "javascript", chapterId: "dom-state-patterns" },
+    "what-is-closure": { subjectId: "javascript", chapterId: "async-runtime-thinking" },
+    "semantic-html-importance": { subjectId: "html", chapterId: "semantic-layout-basics" },
+    "react-state-vs-props": { subjectId: "react", chapterId: "react-state-patterns" }
+  },
+  blog: {
+    "stop-copying-ui": { subjectId: "workflow", chapterId: "shipping-workflows" },
+    "write-after-building": { subjectId: "career", chapterId: "career-learning-loop" }
+  },
+  project: {
+    "knowledge-base-ui": { subjectId: "frontend", chapterId: "responsive-ui-systems" },
+    "creator-portfolio": { subjectId: "workflow", chapterId: "shipping-workflows" }
+  }
+};
+
+const categorySubjectDefaults = {
+  HTML: { subjectId: "html", chapterId: "semantic-layout-basics" },
+  Frontend: { subjectId: "frontend", chapterId: "frontend-production-thinking" },
+  JavaScript: { subjectId: "javascript", chapterId: "dom-state-patterns" },
+  CSS: { subjectId: "css", chapterId: "css-layout-systems" },
+  React: { subjectId: "react", chapterId: "react-component-thinking" },
+  Tools: { subjectId: "tools", chapterId: "tooling-basics" },
+  Career: { subjectId: "career", chapterId: "career-learning-loop" },
+  English: { subjectId: "english", chapterId: "english-communication-practice" },
+  Workflow: { subjectId: "workflow", chapterId: "shipping-workflows" }
+};
+
+function slugify(value, fallback = "item") {
+  const normalized = String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  if (normalized) {
+    return normalized;
+  }
+
+  const safeFallback = String(fallback || "item")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+  return safeFallback || "item";
 }
 
 const storageCache = new Map();
@@ -509,8 +822,65 @@ function updateMetaContent(selector, value) {
   }
 }
 
+function normalizeEntryDraft(entry, index = 0) {
+  const type = String(entry?.type || "blog").trim() || "blog";
+  const title = String(entry?.title || entry?.question || "").trim();
+  const question = String(entry?.question || entry?.title || "").trim();
+  const fallbackSeed = `${type}-${Date.now()}-${index}`;
+  const slug = slugify(entry?.slug || title || question || fallbackSeed, fallbackSeed);
+  const detail = Array.isArray(entry?.detail)
+    ? entry.detail.map((item) => String(item || "").trim()).filter(Boolean)
+    : Array.isArray(entry?.answer)
+      ? entry.answer.map((item) => String(item || "").trim()).filter(Boolean)
+      : htmlToParagraphArray(entry?.detailHtml || entry?.detail || "");
+
+  const normalized = {
+    ...entry,
+    type,
+    slug,
+    title: title || question || slug,
+    question: type === "interview" ? (question || title || slug) : entry?.question,
+    excerpt: String(entry?.excerpt || "").trim(),
+    category: String(entry?.category || "General").trim(),
+    readTime: type === "interview" ? "" : String(entry?.readTime || "").trim(),
+    tags: Array.isArray(entry?.tags) ? entry.tags.map((tag) => String(tag || "").trim()).filter(Boolean) : [],
+    detail,
+    detailHtml: typeof entry?.detailHtml === "string" ? entry.detailHtml : "",
+    code: String(entry?.code || "").trim(),
+    author: String(entry?.author || "You").trim() || "You",
+    status: String(entry?.status || "published").trim() || "published",
+    subjectId: String(entry?.subjectId || "").trim(),
+    chapterId: String(entry?.chapterId || "").trim(),
+    createdAt: entry?.createdAt || Date.now(),
+    updatedAt: entry?.updatedAt || entry?.createdAt || Date.now()
+  };
+
+  if (type === "interview") {
+    normalized.answer = detail;
+    normalized.companies = Array.isArray(entry?.companies) && entry.companies.length ? entry.companies : ["Custom"];
+    normalized.level = String(entry?.level || "Custom interview").trim();
+    normalized.options = Array.isArray(entry?.options)
+      ? entry.options
+          .map((option) => ({
+            key: String(option?.key || "").trim().toUpperCase(),
+            text: String(option?.text || "").trim()
+          }))
+          .filter((option) => option.key && option.text)
+      : [];
+    normalized.correctOption = normalized.options.length ? String(entry?.correctOption || "").trim().toUpperCase() : "";
+  }
+
+  return normalized;
+}
+
 function getLocalEntries() {
-  return loadJson(STORAGE_KEYS.posts, []);
+  const saved = loadJson(STORAGE_KEYS.posts, []);
+  const normalized = Array.isArray(saved) ? saved.map((entry, index) => normalizeEntryDraft(entry, index)) : [];
+  const changed = JSON.stringify(saved) !== JSON.stringify(normalized);
+  if (changed) {
+    saveJson(STORAGE_KEYS.posts, normalized);
+  }
+  return normalized;
 }
 
 const dataStore = {
@@ -542,6 +912,263 @@ const dataStore = {
     this.saveEntries(existing.filter((item) => !(item.slug === slug && item.type === type)));
   }
 };
+
+function mergeByKey(items, key = "id") {
+  const map = new Map();
+  items.forEach((item) => {
+    if (item && item[key]) {
+      map.set(item[key], item);
+    }
+  });
+  return Array.from(map.values());
+}
+
+function getSubjects() {
+  return mergeByKey([...builtInSubjects, ...loadJson(STORAGE_KEYS.subjects, [])], "id");
+}
+
+function getChapters() {
+  return mergeByKey([...builtInChapters, ...loadJson(STORAGE_KEYS.chapters, [])], "id")
+    .map((chapter) => ({
+      ...chapter,
+      lesson: Array.isArray(chapter.lesson) && chapter.lesson.length
+        ? chapter.lesson
+        : builtInChapterLessons[chapter.id] || []
+    }))
+    .sort((a, b) => {
+      if (a.subjectId !== b.subjectId) {
+        return String(a.subjectId).localeCompare(String(b.subjectId));
+      }
+      return Number(a.order || 0) - Number(b.order || 0);
+    });
+}
+
+function getSubjectById(subjectId) {
+  return getSubjects().find((item) => item.id === subjectId) || null;
+}
+
+function getChapterById(chapterId) {
+  return getChapters().find((item) => item.id === chapterId) || null;
+}
+
+function getChaptersBySubject(subjectId) {
+  return getChapters().filter((item) => item.subjectId === subjectId);
+}
+
+function getNextChapterOrder(subjectId) {
+  const chapters = getChaptersBySubject(subjectId);
+  return chapters.length ? Math.max(...chapters.map((item) => Number(item.order || 0))) + 1 : 1;
+}
+
+function saveCustomChapters(chapters) {
+  saveJson(STORAGE_KEYS.chapters, chapters);
+}
+
+function ensureSubjectChapter(subjectId, chapterId = "", chapterTitle = "", defaults = {}) {
+  const effectiveSubjectId = String(subjectId || "").trim();
+  const requestedChapterId = String(chapterId || "").trim();
+  const requestedTitle = String(chapterTitle || "").trim();
+
+  if (!effectiveSubjectId) {
+    return { chapterId: requestedChapterId, chapter: requestedChapterId ? getChapterById(requestedChapterId) : null, created: false };
+  }
+
+  if (requestedChapterId) {
+    const existingChapter = getChapterById(requestedChapterId);
+    const sameTitle = existingChapter && (!requestedTitle || String(existingChapter.title || "").trim().toLowerCase() === requestedTitle.toLowerCase());
+    if (existingChapter && sameTitle) {
+      return { chapterId: existingChapter.id, chapter: existingChapter, created: false };
+    }
+  }
+
+  if (!requestedTitle) {
+    return { chapterId: "", chapter: null, created: false };
+  }
+
+  const normalizedTitle = requestedTitle.toLowerCase();
+  const existingByTitle = getChaptersBySubject(effectiveSubjectId)
+    .find((item) => String(item.title || "").trim().toLowerCase() === normalizedTitle);
+
+  if (existingByTitle) {
+    return { chapterId: existingByTitle.id, chapter: existingByTitle, created: false };
+  }
+
+  const customChapters = loadJson(STORAGE_KEYS.chapters, []);
+  const nextChapter = {
+    id: slugify(defaults.idSeed || requestedTitle || `chapter-${Date.now()}`, `chapter-${Date.now()}`),
+    subjectId: effectiveSubjectId,
+    title: requestedTitle,
+    order: Number(defaults.order || getNextChapterOrder(effectiveSubjectId)),
+    description: String(defaults.description || "").trim() || `Chapter for ${requestedTitle}.`
+  };
+  const next = customChapters.filter((item) => item.id !== nextChapter.id);
+  next.unshift(nextChapter);
+  saveCustomChapters(next);
+  return { chapterId: nextChapter.id, chapter: nextChapter, created: true };
+}
+
+function getTaxonomyAssignment(type, slug) {
+  return builtInContentAssignments[type]?.[slug] || null;
+}
+
+function getCategoryTaxonomyAssignment(category) {
+  if (!category) {
+    return null;
+  }
+  return categorySubjectDefaults[String(category).trim()] || null;
+}
+
+function attachTaxonomy(item, typeOverride = "") {
+  const type = typeOverride || item.type;
+  const assignment = getTaxonomyAssignment(type, item.slug);
+  const categoryAssignment = getCategoryTaxonomyAssignment(item.category);
+  return {
+    ...item,
+    subjectId: item.subjectId || assignment?.subjectId || categoryAssignment?.subjectId || "",
+    chapterId: item.chapterId || assignment?.chapterId || categoryAssignment?.chapterId || ""
+  };
+}
+
+function getSubjectHref(subject) {
+  return `subject.html?subject=${encodeURIComponent(subject.id)}`;
+}
+
+function getChapterHref(chapter) {
+  return `chapter.html?chapter=${encodeURIComponent(chapter.id)}`;
+}
+
+function getChapterBookmarks() {
+  return loadJson(STORAGE_KEYS.chapterBookmarks, []);
+}
+
+function getChapterPractice() {
+  return loadJson(STORAGE_KEYS.chapterPractice, {});
+}
+
+function getChapterCompletions() {
+  return loadJson(STORAGE_KEYS.chapterCompletions, {});
+}
+
+function saveChapterBookmarks(bookmarks) {
+  saveJson(STORAGE_KEYS.chapterBookmarks, bookmarks);
+}
+
+function saveChapterPractice(practice) {
+  saveJson(STORAGE_KEYS.chapterPractice, practice);
+}
+
+function saveChapterCompletions(completions) {
+  saveJson(STORAGE_KEYS.chapterCompletions, completions);
+}
+
+function toggleChapterBookmark(chapterId) {
+  const bookmarks = new Set(getChapterBookmarks());
+  if (bookmarks.has(chapterId)) {
+    bookmarks.delete(chapterId);
+  } else {
+    bookmarks.add(chapterId);
+  }
+  const next = Array.from(bookmarks);
+  saveChapterBookmarks(next);
+  return bookmarks.has(chapterId);
+}
+
+function markChapterCompleted(chapterId) {
+  const completions = getChapterCompletions();
+  completions[chapterId] = Date.now();
+  saveChapterCompletions(completions);
+  markProgress("revised", `chapter:${chapterId}`);
+}
+
+function saveChapterPracticeResult(chapterId, score, total) {
+  const practice = getChapterPractice();
+  const previous = practice[chapterId] || { attempts: 0, bestScore: 0, total: total || 0, lastScore: 0 };
+  practice[chapterId] = {
+    attempts: previous.attempts + 1,
+    bestScore: Math.max(previous.bestScore || 0, score),
+    total: total || previous.total || 0,
+    lastScore: score,
+    updatedAt: Date.now()
+  };
+  saveChapterPractice(practice);
+  return practice[chapterId];
+}
+
+function getChapterResources(chapterId) {
+  const collections = getContentCollections();
+  return {
+    notes: collections.note.filter((item) => item.chapterId === chapterId),
+    tutorials: collections.tutorial.filter((item) => item.chapterId === chapterId),
+    cheatsheets: collections.cheatsheet.filter((item) => item.chapterId === chapterId),
+    projects: collections.project.filter((item) => item.chapterId === chapterId),
+    blog: collections.blog.filter((item) => item.chapterId === chapterId),
+    questions: getInterviewQuestions().filter((item) => item.chapterId === chapterId)
+  };
+}
+
+function getChapterReadingBlocks(chapter, subject, resources) {
+  if (Array.isArray(chapter.lesson) && chapter.lesson.length) {
+    return chapter.lesson;
+  }
+
+  const blocks = [
+    `${chapter.title} ${subject?.name ? `is part of the ${subject.name} path.` : "is part of your current learning path."}`,
+    chapter.description
+  ];
+
+  if (resources.notes.length) {
+    blocks.push(`Start with ${resources.notes.map((item) => item.title).join(", ")} to build your foundation for this chapter.`);
+  } else {
+    blocks.push("This chapter does not have a dedicated note yet, so use the guided overview below and continue with the related tutorials and questions.");
+  }
+
+  if (resources.tutorials.length) {
+    blocks.push(`Related tutorials: ${resources.tutorials.map((item) => item.title).join(", ")}.`);
+  }
+
+  if (resources.cheatsheets.length) {
+    blocks.push(`Quick references available: ${resources.cheatsheets.map((item) => item.title).join(", ")}.`);
+  }
+
+  if (resources.questions.length) {
+    blocks.push(`Practice prompts in this chapter focus on: ${resources.questions.map((item) => item.question).slice(0, 3).join(" | ")}.`);
+  }
+
+  if (resources.projects.length) {
+    blocks.push(`Apply the chapter through projects like ${resources.projects.map((item) => item.title).join(", ")}.`);
+  }
+
+  if (resources.blog.length) {
+    blocks.push(`Reflection and workflow articles for this topic: ${resources.blog.map((item) => item.title).join(", ")}.`);
+  }
+
+  return blocks.filter(Boolean);
+}
+
+function getSubjectProgressSummary(subjectId) {
+  const subject = getSubjectById(subjectId);
+  const chapters = getChaptersBySubject(subjectId);
+  const completions = getChapterCompletions();
+  const practice = getChapterPractice();
+  const completed = chapters.filter((chapter) => completions[chapter.id]).length;
+  const attempts = chapters.reduce((count, chapter) => count + (practice[chapter.id]?.attempts || 0), 0);
+  const earned = chapters.reduce((sum, chapter) => sum + (practice[chapter.id]?.bestScore || 0), 0);
+  const available = chapters.reduce((sum, chapter) => sum + (practice[chapter.id]?.total || getChapterResources(chapter.id).questions.length || 0), 0);
+  return {
+    subject,
+    chapters,
+    completed,
+    attempts,
+    scorePercent: available ? Math.round((earned / available) * 100) : 0,
+    completionPercent: chapters.length ? Math.round((completed / chapters.length) * 100) : 0
+  };
+}
+
+function getRecommendedChapter() {
+  const chapters = getChapters();
+  const completions = getChapterCompletions();
+  return chapters.find((chapter) => !completions[chapter.id]) || chapters[0] || null;
+}
 
 function getBookmarks() {
   return loadJson(STORAGE_KEYS.bookmarks, []);
@@ -597,20 +1224,20 @@ function recordRecentView(item) {
 }
 
 function getContentCollections() {
-  const localEntries = getLocalEntries().map((entry) => ({ ...entry, isLocal: true }));
+  const localEntries = getLocalEntries().map((entry) => attachTaxonomy({ ...entry, isLocal: true }, entry.type));
   return {
-    tutorial: tutorials,
-    project: projects,
-    blog: [...localEntries.filter((entry) => entry.type === "blog"), ...blogPosts],
-    note: [...localEntries.filter((entry) => entry.type === "note"), ...notes],
-    cheatsheet: [...localEntries.filter((entry) => entry.type === "cheatsheet"), ...cheatSheets]
+    tutorial: tutorials.map((item) => attachTaxonomy(item, "tutorial")),
+    project: projects.map((item) => attachTaxonomy(item, "project")),
+    blog: [...localEntries.filter((entry) => entry.type === "blog"), ...blogPosts.map((item) => attachTaxonomy(item, "blog"))],
+    note: [...localEntries.filter((entry) => entry.type === "note"), ...notes.map((item) => attachTaxonomy(item, "note"))],
+    cheatsheet: [...localEntries.filter((entry) => entry.type === "cheatsheet"), ...cheatSheets.map((item) => attachTaxonomy(item, "cheatsheet"))]
   };
 }
 
 function getInterviewQuestions() {
   const localEntries = getLocalEntries()
     .filter((entry) => entry.type === "interview")
-    .map((entry) => ({
+    .map((entry) => attachTaxonomy({
       ...entry,
       question: entry.question || entry.title,
       title: entry.title || entry.question,
@@ -631,12 +1258,12 @@ function getInterviewQuestions() {
       companies: Array.isArray(entry.companies) ? entry.companies : ["Custom"],
       level: entry.level || "Admin-added",
       isLocal: true
-    }));
+    }, "interview"));
 
-  const builtIn = interviewQuestions.map((item) => ({
+  const builtIn = interviewQuestions.map((item) => attachTaxonomy({
     ...item,
     title: item.question
-  }));
+  }, "interview"));
 
   return [...localEntries, ...builtIn];
 }
@@ -977,6 +1604,18 @@ function getItemMeta(item) {
   return item.level || item.stack || item.author || item.category;
 }
 
+function getTaxonomyLabel(item) {
+  const chapter = item.chapterId ? getChapterById(item.chapterId) : null;
+  const subject = item.subjectId ? getSubjectById(item.subjectId) : null;
+  if (subject && chapter) {
+    return `${subject.name} / ${chapter.title}`;
+  }
+  if (subject && item.chapterTitle) {
+    return `${subject.name} / ${item.chapterTitle}`;
+  }
+  return subject?.name || "";
+}
+
 function formatEntryTimestamp(value) {
   if (!value) {
     return "";
@@ -999,6 +1638,7 @@ function getContentHref(item) {
 }
 
 function createCard(item) {
+  const taxonomyLabel = getTaxonomyLabel(item);
   return `
     <article class="content-card">
       <div class="card-top">
@@ -1009,6 +1649,7 @@ function createCard(item) {
         <h3>${escapeHtml(item.title)}</h3>
         <p class="card-excerpt">${escapeHtml(item.excerpt)}</p>
       </div>
+      ${taxonomyLabel ? `<p class="card-meta card-path">${escapeHtml(taxonomyLabel)}</p>` : ""}
       <div class="tag-row">${item.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
       <div class="card-footer">
         <span class="card-meta">${escapeHtml(getItemMeta(item))}</span>
@@ -1019,11 +1660,65 @@ function createCard(item) {
 }
 
 function createResourceLink(item) {
+  const taxonomyLabel = getTaxonomyLabel(item);
   return `
     <a class="resource-link" href="${getContentHref(item)}">
       <strong>${escapeHtml(item.title)}</strong>
-      <span>${escapeHtml(item.category)} - ${escapeHtml(item.readTime)}</span>
+      <span>${escapeHtml([item.category, item.readTime, taxonomyLabel].filter(Boolean).join(" - "))}</span>
     </a>
+  `;
+}
+
+function createSubjectCard(subject) {
+  const progress = getSubjectProgressSummary(subject.id);
+  return `
+    <article class="content-card subject-card" data-subject-card="${escapeHtml(subject.id)}" tabindex="0" role="button" aria-label="${escapeHtml(`Open ${subject.name} chapters`)}">
+      <div class="card-top">
+        <span class="card-type">subject</span>
+        <span class="card-meta">${progress.completed}/${progress.chapters.length} chapters</span>
+      </div>
+      <div>
+        <h3>${escapeHtml(subject.name)}</h3>
+        <p class="card-excerpt">${escapeHtml(subject.description)}</p>
+      </div>
+      <div class="tag-row">
+        <span>${escapeHtml(subject.icon || "Learning path")}</span>
+        <span>${progress.completionPercent}% complete</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-meta">${progress.scorePercent}% practice score</span>
+        <a class="card-link" href="${getSubjectHref(subject)}">View Chapters</a>
+      </div>
+    </article>
+  `;
+}
+
+function createChapterCard(chapter) {
+  const subject = getSubjectById(chapter.subjectId);
+  const resources = getChapterResources(chapter.id);
+  const chapterReadingBlocks = getChapterReadingBlocks(chapter, subject, resources);
+  const completed = Boolean(getChapterCompletions()[chapter.id]);
+  const relatedResourceCount = resources.notes.length + resources.tutorials.length + resources.cheatsheets.length + resources.blog.length;
+  return `
+    <article class="content-card chapter-card">
+      <div class="card-top">
+        <span class="card-type">chapter ${escapeHtml(String(chapter.order || 0))}</span>
+        <span class="card-meta">${completed ? "Completed" : "In progress"}</span>
+      </div>
+      <div>
+        <h3>${escapeHtml(chapter.title)}</h3>
+        <p class="card-excerpt">${escapeHtml(chapter.description)}</p>
+      </div>
+      <div class="tag-row">
+        <span>${escapeHtml(subject?.name || "Subject")}</span>
+        <span>${resources.questions.length} practice</span>
+        <span>${relatedResourceCount} resources</span>
+      </div>
+      <div class="card-footer">
+        <span class="card-meta">Step ${escapeHtml(String(chapter.order || 0))}</span>
+        <a class="card-link" href="${getChapterHref(chapter)}">Open Chapter</a>
+      </div>
+    </article>
   `;
 }
 
@@ -1119,6 +1814,17 @@ function getSearchIndex() {
     },
     {
       searchType: "page",
+      slug: "subjects-page",
+      title: "Subjects",
+      excerpt: "Browse structured subjects and move chapter by chapter through notes, tutorials, and practice.",
+      category: "Learn",
+      readTime: "Page",
+      tags: ["subjects", "chapters", "learning path"],
+      detail: ["Subjects organize notes, tutorials, and interview practice into guided progression."],
+      href: "subjects.html"
+    },
+    {
+      searchType: "page",
       slug: "editor-page",
       title: "Editor",
       excerpt: "Create local notes, blog posts, and interview questions inside the site workflow.",
@@ -1155,8 +1861,33 @@ function getSearchIndex() {
     searchType: "interview",
     href: `interview.html?focus=${encodeURIComponent(item.slug)}`
   }));
+  const subjectEntries = getSubjects().map((item) => ({
+    searchType: "subject",
+    slug: item.id,
+    title: item.name,
+    excerpt: item.description,
+    category: "Structured path",
+    readTime: `${getChaptersBySubject(item.id).length} chapters`,
+    tags: ["subject", item.icon || "learning"],
+    detail: [item.description],
+    href: getSubjectHref(item)
+  }));
+  const chapterEntries = getChapters().map((item) => {
+    const subject = getSubjectById(item.subjectId);
+    return {
+      searchType: "chapter",
+      slug: item.id,
+      title: item.title,
+      excerpt: item.description,
+      category: subject?.name || "Chapter",
+      readTime: `Chapter ${item.order}`,
+      tags: ["chapter", subject?.name || ""].filter(Boolean),
+      detail: [item.description],
+      href: getChapterHref(item)
+    };
+  });
 
-  return [...pageEntries, ...contentEntries, ...interviewEntries];
+  return [...pageEntries, ...subjectEntries, ...chapterEntries, ...contentEntries, ...interviewEntries];
 }
 
 function getSearchItemMeta(item) {
@@ -1303,12 +2034,20 @@ function setupAccessibility() {
     if (!main.id) {
       main.id = "mainContent";
     }
+    if (!main.hasAttribute("tabindex")) {
+      main.setAttribute("tabindex", "-1");
+    }
 
     if (!document.querySelector(".skip-link")) {
       const skipLink = document.createElement("a");
       skipLink.className = "skip-link";
       skipLink.href = `#${main.id}`;
       skipLink.textContent = "Skip to content";
+      skipLink.addEventListener("click", () => {
+        window.setTimeout(() => {
+          main.focus({ preventScroll: true });
+        }, 0);
+      });
       document.body.insertAdjacentElement("afterbegin", skipLink);
     }
   }
@@ -1433,14 +2172,123 @@ function renderFeaturedContent() {
     return;
   }
 
-  const featured = [notes[0], tutorials[2], cheatSheets[0]];
-  target.innerHTML = featured.map(createCard).join("");
+  const recommendedChapter = getRecommendedChapter();
+  const collections = getContentCollections();
+  const fallbackItems = [
+    collections.note[0],
+    collections.tutorial[0],
+    collections.blog[0]
+  ].filter(Boolean);
+  const featured = [
+    ...(recommendedChapter ? [{
+      type: "chapter",
+      title: recommendedChapter.title,
+      excerpt: recommendedChapter.description,
+      readTime: `Chapter ${recommendedChapter.order}`,
+      tags: [getSubjectById(recommendedChapter.subjectId)?.name || "Subject", "guided path"],
+      category: "Learning path",
+      level: "Recommended",
+      subjectId: recommendedChapter.subjectId,
+      chapterId: recommendedChapter.id,
+      slug: recommendedChapter.id,
+      href: getChapterHref(recommendedChapter)
+    }] : []),
+    ...fallbackItems
+  ].slice(0, 3);
+  target.innerHTML = featured.map((item) => item.type === "chapter"
+    ? `
+        <article class="content-card">
+          <div class="card-top">
+            <span class="card-type">chapter</span>
+            <span class="card-meta">${escapeHtml(item.readTime)}</span>
+          </div>
+          <div>
+            <h3>${escapeHtml(item.title)}</h3>
+            <p class="card-excerpt">${escapeHtml(item.excerpt)}</p>
+          </div>
+          <div class="tag-row">${item.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+          <div class="card-footer">
+            <span class="card-meta">${escapeHtml(item.level)}</span>
+            <a class="card-link" href="${escapeHtml(item.href)}">Open</a>
+          </div>
+        </article>
+      `
+    : createCard(item)).join("");
+}
+
+function renderHomeHeroStats() {
+  const tracksStat = document.getElementById("heroTracksStat");
+  const projectsStat = document.getElementById("heroProjectsStat");
+  const articlesStat = document.getElementById("heroArticlesStat");
+
+  if (!tracksStat || !projectsStat || !articlesStat) {
+    return;
+  }
+
+  const collections = getContentCollections();
+  const totalProjects = collections.project.length;
+  const totalArticles = collections.blog.length + collections.note.length + collections.tutorial.length + collections.cheatsheet.length;
+  tracksStat.textContent = `${getSubjects().length} focused paths`;
+  projectsStat.textContent = `${totalProjects} build briefs`;
+  articlesStat.textContent = `${totalArticles} published resources`;
+}
+
+function bindSubjectCardGrid(grid) {
+  if (!grid) {
+    return;
+  }
+
+  function getSubjectIdFromEventTarget(target) {
+    const card = target.closest("[data-subject-card]");
+    if (card?.dataset.subjectCard) {
+      return card.dataset.subjectCard;
+    }
+    const link = target.closest("a[href*='subject.html?subject=']");
+    return link ? new URL(link.href, window.location.href).searchParams.get("subject") : "";
+  }
+
+  grid.addEventListener("click", (event) => {
+    const subjectId = getSubjectIdFromEventTarget(event.target);
+    if (!subjectId) {
+      return;
+    }
+
+    const link = event.target.closest("a[href*='subject.html?subject=']");
+    if (link) {
+      return;
+    }
+
+    const subject = getSubjectById(subjectId);
+    if (!subject) {
+      return;
+    }
+
+    window.location.href = getSubjectHref(subject);
+  });
+
+  grid.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    const card = event.target.closest("[data-subject-card]");
+    const subjectId = card?.dataset.subjectCard || "";
+    const subject = subjectId ? getSubjectById(subjectId) : null;
+    if (!subject) {
+      return;
+    }
+
+    event.preventDefault();
+    window.location.href = getSubjectHref(subject);
+  });
 }
 
 function setupHomeWorkspace() {
   const spotlight = document.getElementById("homeWorkspaceSpotlight");
   const recentTarget = document.getElementById("homeRecentList");
-  if (!spotlight || !recentTarget) {
+  const subjectGrid = document.getElementById("homeSubjectsGrid");
+  const journeyTarget = document.getElementById("homeJourneyCard");
+  if (!spotlight || !recentTarget || !subjectGrid || !journeyTarget) {
     return;
   }
 
@@ -1455,6 +2303,8 @@ function setupHomeWorkspace() {
   const revisedCount = Object.keys(progress.revised || {}).length;
   const plannedCount = Object.keys(planner).length;
   const latest = recent[0];
+  const recommendedChapter = getRecommendedChapter();
+  const recommendedSubject = recommendedChapter ? getSubjectById(recommendedChapter.subjectId) : null;
 
   const title = learnerName
     ? `${learnerName}, your learning workspace is ready`
@@ -1478,6 +2328,34 @@ function setupHomeWorkspace() {
     </div>
     ${bookmarks.length ? `<div class="resource-list">${bookmarks.map(createResourceLink).join("")}</div>` : ""}
   `;
+
+  const subjectCards = getSubjects().slice(0, 6);
+  subjectGrid.innerHTML = subjectCards.map(createSubjectCard).join("");
+  bindSubjectCardGrid(subjectGrid);
+
+  journeyTarget.innerHTML = recommendedChapter
+    ? `
+        <p class="eyebrow">Suggested next step</p>
+        <h3>${escapeHtml(recommendedChapter.title)}</h3>
+        <p>${escapeHtml(recommendedChapter.description)}</p>
+        <div class="tag-row">
+          <span>${escapeHtml(recommendedSubject?.name || "Subject")}</span>
+          <span>${escapeHtml(`Chapter ${recommendedChapter.order}`)}</span>
+        </div>
+        <div class="hero-actions">
+          <a class="button" href="${getChapterHref(recommendedChapter)}">Continue Chapter</a>
+          <a class="button button-ghost" href="${recommendedSubject ? getSubjectHref(recommendedSubject) : "subjects.html"}">View Subject</a>
+        </div>
+      `
+    : `
+        <p class="eyebrow">Suggested next step</p>
+        <h3>Open your first subject</h3>
+        <p>Pick a subject path, open chapter one, and use notes plus practice together instead of jumping between random pages.</p>
+        <div class="hero-actions">
+          <a class="button" href="subjects.html">Browse Subjects</a>
+          <a class="button button-ghost" href="dashboard.html">Open Dashboard</a>
+        </div>
+      `;
 
   recentTarget.innerHTML = recent.length
     ? recent.map((item) => `
@@ -1702,6 +2580,10 @@ const NAV_GROUPS = {
 };
 
 function getCurrentNavKey(page) {
+  if (page === "chapter" || page === "subject") {
+    return "subjects";
+  }
+
   if (page !== "content") {
     return page;
   }
@@ -1956,6 +2838,484 @@ function renderListing(page) {
   applyFilters();
 }
 
+function setupSubjectsPage() {
+  const searchInput = document.getElementById("subjectSearch");
+  const grid = document.getElementById("subjectsGrid");
+  const empty = document.getElementById("subjectsEmpty");
+  const createLink = document.getElementById("createSubjectShortcut");
+
+  if (!searchInput || !grid || !empty || !createLink) {
+    return;
+  }
+
+  const subjects = getSubjects();
+
+  function renderGrid() {
+    const query = searchInput.value.trim().toLowerCase();
+    const filtered = subjects.filter((subject) => {
+      const chapterTitles = getChaptersBySubject(subject.id).map((chapter) => chapter.title).join(" ");
+      const haystack = `${subject.name} ${subject.description} ${subject.icon || ""} ${chapterTitles}`.toLowerCase();
+      return !query || haystack.includes(query);
+    });
+
+    grid.innerHTML = filtered.map(createSubjectCard).join("");
+    empty.hidden = filtered.length !== 0;
+  }
+
+  searchInput.addEventListener("input", renderGrid);
+  renderGrid();
+  bindSubjectCardGrid(grid);
+  createLink.href = "admin.html#subjectStudio";
+}
+
+function setupSubjectDetailPage() {
+  const params = new URLSearchParams(window.location.search);
+  const subjectId = params.get("subject") || "";
+  const subject = getSubjectById(subjectId);
+  const breadcrumb = document.getElementById("subjectBreadcrumb");
+  const title = document.getElementById("subjectDetailTitle");
+  const description = document.getElementById("subjectDetailDescription");
+  const meta = document.getElementById("subjectDetailMeta");
+  const chaptersGrid = document.getElementById("subjectDetailChapters");
+  const empty = document.getElementById("subjectDetailEmpty");
+
+  if (!breadcrumb || !title || !description || !meta || !chaptersGrid || !empty) {
+    return;
+  }
+
+  if (!subject) {
+    title.textContent = "Subject not found";
+    description.textContent = "Open the subjects page and choose a valid subject.";
+    empty.hidden = false;
+    chaptersGrid.innerHTML = "";
+    breadcrumb.innerHTML = `
+      <a href="index.html">Home</a>
+      <span>/</span>
+      <a href="subjects.html">Subjects</a>
+    `;
+    return;
+  }
+
+  const progress = getSubjectProgressSummary(subject.id);
+  const chapters = getChaptersBySubject(subject.id);
+  document.title = `TechAmitCode | ${subject.name}`;
+  updateMetaContent("meta[name='description']", subject.description);
+  updateMetaContent("meta[property='og:title']", `TechAmitCode | ${subject.name}`);
+  updateMetaContent("meta[property='og:description']", subject.description);
+
+  breadcrumb.innerHTML = `
+    <a href="index.html">Home</a>
+    <span>/</span>
+    <a href="subjects.html">Subjects</a>
+    <span>/</span>
+    <span>${escapeHtml(subject.name)}</span>
+  `;
+  title.textContent = subject.name;
+  description.textContent = subject.description;
+  meta.innerHTML = `
+    <span class="status-pill">${progress.completed}/${chapters.length} completed</span>
+    <span class="status-pill">${progress.scorePercent}% best practice</span>
+    <a class="button button-ghost button-small" href="admin.html#subjectStudio">Create New Subject</a>
+  `;
+  chaptersGrid.innerHTML = chapters.map(createChapterCard).join("");
+  empty.hidden = chapters.length !== 0;
+}
+
+function setupChapterPage() {
+  const params = new URLSearchParams(window.location.search);
+  const chapterId = params.get("chapter") || "";
+  const chapter = getChapterById(chapterId);
+  const breadcrumb = document.getElementById("chapterBreadcrumb");
+  const title = document.getElementById("chapterTitle");
+  const description = document.getElementById("chapterDescription");
+  const meta = document.getElementById("chapterMeta");
+  const notesTarget = document.getElementById("chapterNotes");
+  const tutorialsTarget = document.getElementById("chapterTutorials");
+  const cheatsTarget = document.getElementById("chapterCheatsheets");
+  const questionsTarget = document.getElementById("chapterQuestions");
+  const bookmarkButton = document.getElementById("chapterBookmarkButton");
+  const completeButton = document.getElementById("chapterCompleteButton");
+  const prevLink = document.getElementById("chapterPrevLink");
+  const nextLink = document.getElementById("chapterNextLink");
+  const prevLinkBottom = document.getElementById("chapterPrevLinkBottom");
+  const nextLinkBottom = document.getElementById("chapterNextLinkBottom");
+  const flashcardCard = document.getElementById("chapterFlashcard");
+  const flashcardFlip = document.getElementById("chapterFlipFlashcard");
+  const flashcardNext = document.getElementById("chapterNextFlashcard");
+  const mcqTarget = document.getElementById("chapterMcq");
+  const quizCard = document.getElementById("chapterQuizCard");
+  const quizReveal = document.getElementById("chapterQuizReveal");
+  const quizCorrect = document.getElementById("chapterQuizCorrect");
+  const quizWrong = document.getElementById("chapterQuizWrong");
+  const flashcardActions = document.getElementById("chapterFlashcardActions");
+  const quizActions = document.getElementById("chapterQuizActions");
+  const quizProgress = document.getElementById("chapterQuizProgress");
+  const quizFeedback = document.getElementById("chapterQuizFeedback");
+  const practiceStats = document.getElementById("chapterPracticeStats");
+  const practiceSection = document.getElementById("chapterPracticeSection");
+  const questionsSection = document.getElementById("chapterQuestionsSection");
+  const chapterOutline = document.getElementById("chapterOutline");
+
+  if (!breadcrumb || !title || !description || !meta || !notesTarget || !tutorialsTarget || !cheatsTarget || !questionsTarget || !bookmarkButton || !completeButton || !prevLink || !nextLink || !prevLinkBottom || !nextLinkBottom || !flashcardCard || !flashcardFlip || !flashcardNext || !mcqTarget || !quizCard || !quizReveal || !quizCorrect || !quizWrong || !flashcardActions || !quizActions || !quizProgress || !quizFeedback || !practiceStats || !practiceSection || !questionsSection || !chapterOutline) {
+    return;
+  }
+
+  if (!chapter) {
+    title.textContent = "Chapter not found";
+    description.textContent = "Open the subjects page and select a valid chapter.";
+    return;
+  }
+
+  const subject = getSubjectById(chapter.subjectId);
+  const resources = getChapterResources(chapter.id);
+  const chapterReadingBlocks = getChapterReadingBlocks(chapter, subject, resources);
+  const chapterOrder = getChaptersBySubject(chapter.subjectId);
+  const currentIndex = chapterOrder.findIndex((item) => item.id === chapter.id);
+  const previousChapter = currentIndex > 0 ? chapterOrder[currentIndex - 1] : null;
+  const nextChapter = currentIndex >= 0 && currentIndex < chapterOrder.length - 1 ? chapterOrder[currentIndex + 1] : null;
+  const practiceQuestions = resources.questions.slice(0, 5);
+  const mcqQuestions = practiceQuestions.filter((item) => Array.isArray(item.options) && item.options.length);
+  const primaryReading = resources.notes[0] || resources.blog[0] || null;
+  const extraReading = resources.notes.length
+    ? resources.notes.slice(1)
+    : resources.blog.length > 1
+      ? resources.blog.slice(1)
+      : [];
+  const practiceRecord = getChapterPractice()[chapter.id];
+  const completionMap = getChapterCompletions();
+  const isCompleted = Boolean(completionMap[chapter.id]);
+  const bookmarked = getChapterBookmarks().includes(chapter.id);
+
+  document.title = `TechAmitCode | ${chapter.title}`;
+  updateMetaContent("meta[name='description']", chapter.description);
+  updateMetaContent("meta[property='og:title']", `TechAmitCode | ${chapter.title}`);
+  updateMetaContent("meta[property='og:description']", chapter.description);
+
+  breadcrumb.innerHTML = `
+    <a href="index.html">Home</a>
+    <span>/</span>
+    <a href="${getSubjectHref(subject)}">${escapeHtml(subject?.name || "Subject")}</a>
+    <span>/</span>
+    <span>${escapeHtml(chapter.title)}</span>
+  `;
+  title.textContent = chapter.title;
+  description.textContent = chapter.description;
+  meta.innerHTML = `
+    <span class="status-pill">${escapeHtml(subject?.name || "Subject")}</span>
+    <span class="status-pill">Chapter ${escapeHtml(String(chapter.order || 0))}</span>
+    <span class="status-pill">${resources.questions.length} practice questions</span>
+  `;
+
+  const primaryReadingMarkup = primaryReading
+    ? `
+        <article class="surface chapter-resource-block chapter-resource-block-primary">
+          <div class="card-top">
+            <span class="card-type">${escapeHtml(primaryReading.type === "blog" ? "primary reading" : primaryReading.type)}</span>
+            <span class="card-meta">${escapeHtml(primaryReading.readTime || subject?.name || "Reading")}</span>
+          </div>
+          <h3>${escapeHtml(primaryReading.title)}</h3>
+          ${primaryReading.excerpt ? `<p class="card-excerpt">${escapeHtml(primaryReading.excerpt)}</p>` : ""}
+          <div class="article-body">${primaryReading.detailHtml ? formatBody(primaryReading.detailHtml) : formatBody(primaryReading.detail)}</div>
+          <div class="card-footer">
+            <span class="card-meta">${escapeHtml(getTaxonomyLabel(primaryReading) || primaryReading.category || "Reading")}</span>
+            <a class="card-link" href="${getContentHref(primaryReading)}">Open Full ${primaryReading.type === "blog" ? "Post" : "Note"}</a>
+          </div>
+        </article>
+      `
+    : "";
+
+  notesTarget.innerHTML = `
+      <article class="surface chapter-resource-block chapter-resource-block-lesson">
+        <div class="card-top">
+          <span class="card-type">chapter lesson</span>
+          <span class="card-meta">${escapeHtml(subject?.name || "Learning path")}</span>
+        </div>
+        <h3>${escapeHtml(`${chapter.title} lesson`)}</h3>
+        <div class="article-body">${formatBody(chapterReadingBlocks)}</div>
+      </article>
+      ${primaryReadingMarkup}
+      ${extraReading.length
+        ? extraReading.map((item) => `
+        <article class="surface chapter-resource-block">
+          <div class="card-top">
+            <span class="card-type">${escapeHtml(item.type)}</span>
+            <span class="card-meta">${escapeHtml(item.readTime)}</span>
+          </div>
+          <h3>${escapeHtml(item.title)}</h3>
+          <div class="article-body">${item.detailHtml ? formatBody(item.detailHtml) : formatBody(item.detail)}</div>
+          <div class="card-footer">
+            <span class="card-meta">${escapeHtml(item.category)}</span>
+            <a class="card-link" href="${getContentHref(item)}">Open Full Note</a>
+          </div>
+        </article>
+      `).join("")
+        : ""}
+    `;
+
+  const supportResources = [...resources.tutorials, ...resources.blog.filter((item) => item.slug !== primaryReading?.slug)];
+  tutorialsTarget.innerHTML = supportResources.length
+    ? supportResources.map(createResourceLink).join("")
+    : "<p class=\"empty-state\">This chapter has no extra support links yet. Add tutorials or blog posts from the editor to expand it.</p>";
+
+  cheatsTarget.innerHTML = resources.cheatsheets.length
+    ? resources.cheatsheets.map((item) => `
+        <article class="surface chapter-resource-block">
+          <div class="card-top">
+            <span class="card-type">cheatsheet</span>
+            <span class="card-meta">${escapeHtml(item.readTime)}</span>
+          </div>
+          <h3>${escapeHtml(item.title)}</h3>
+          <p class="card-excerpt">${escapeHtml(item.excerpt)}</p>
+          ${item.code ? `<pre class="code-block">${escapeHtml(item.code)}</pre>` : ""}
+          <div class="card-footer">
+            <span class="card-meta">${escapeHtml(item.category)}</span>
+            <a class="card-link" href="${getContentHref(item)}">Open Sheet</a>
+          </div>
+        </article>
+      `).join("")
+    : "<p class=\"empty-state\">No quick cheat sheet is linked to this chapter yet.</p>";
+
+  questionsTarget.innerHTML = resources.questions.length
+    ? resources.questions.map((item) => `
+        <article class="question-card" data-question-card="${escapeHtml(item.slug)}">
+          <div class="question-head">
+            <div>
+              <span class="card-type">${escapeHtml(item.category)}</span>
+              <h3>${escapeHtml(item.question)}</h3>
+              <p class="card-excerpt">${escapeHtml(item.excerpt)}</p>
+            </div>
+            <div class="question-actions">
+              <button class="button button-ghost button-small" type="button" data-question-toggle="${escapeHtml(item.slug)}">Show Answer</button>
+              <button class="button button-ghost button-small" type="button" data-question-revise="${escapeHtml(item.slug)}">Mark Revised</button>
+            </div>
+          </div>
+          <div class="tag-row">${item.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
+          <div class="question-answer" id="answer-${escapeHtml(item.slug)}" hidden>
+            ${Array.isArray(item.options) && item.options.length ? renderInterviewOptions(item.options, item.correctOption) : ""}
+            ${item.answer.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("")}
+            ${item.code ? `<pre class="code-block">${escapeHtml(item.code)}</pre>` : ""}
+          </div>
+        </article>
+      `).join("")
+    : "<p class=\"empty-state\">No practice questions are linked to this chapter yet.</p>";
+
+  const outlineItems = [
+    { title: "Lesson overview", meta: "Chapter summary and guided notes" },
+    primaryReading ? { title: primaryReading.title, meta: `${primaryReading.type === "blog" ? "Primary post" : "Primary note"} to read next` } : null,
+    supportResources.length ? { title: "Support resources", meta: `${supportResources.length} extra link${supportResources.length === 1 ? "" : "s"} for deeper study` } : null,
+    resources.cheatsheets.length ? { title: "Cheat sheet", meta: `${resources.cheatsheets.length} quick reference attached` } : null,
+    practiceQuestions.length || mcqQuestions.length ? { title: "Practice drills", meta: `${Math.max(practiceQuestions.length, mcqQuestions.length)} self-check prompt${Math.max(practiceQuestions.length, mcqQuestions.length) === 1 ? "" : "s"}` } : null,
+    resources.questions.length ? { title: "Interview questions", meta: `${resources.questions.length} mapped question${resources.questions.length === 1 ? "" : "s"}` } : null
+  ].filter(Boolean);
+  chapterOutline.innerHTML = outlineItems.map((item, index) => `
+    <article class="chapter-outline-item">
+      <span class="chapter-outline-step">${String(index + 1).padStart(2, "0")}</span>
+      <div>
+        <strong>${escapeHtml(item.title)}</strong>
+        <p>${escapeHtml(item.meta)}</p>
+      </div>
+    </article>
+  `).join("");
+
+  practiceSection.hidden = !practiceQuestions.length && !mcqQuestions.length;
+  questionsSection.hidden = !resources.questions.length;
+
+  questionsTarget.addEventListener("click", (event) => {
+    const toggleButton = event.target.closest("[data-question-toggle]");
+    const reviseButton = event.target.closest("[data-question-revise]");
+
+    if (toggleButton) {
+      const slug = toggleButton.dataset.questionToggle;
+      const answer = document.getElementById(`answer-${slug}`);
+      if (!answer) {
+        return;
+      }
+      const hidden = answer.hasAttribute("hidden");
+      answer.toggleAttribute("hidden");
+      toggleButton.textContent = hidden ? "Hide Answer" : "Show Answer";
+      return;
+    }
+
+    if (reviseButton) {
+      const slug = reviseButton.dataset.questionRevise;
+      markProgress("revised", `interview:${slug}`);
+      reviseButton.textContent = "Revised";
+      reviseButton.classList.add("is-success");
+      showNotification("Question saved to revision progress.", "success");
+    }
+  });
+
+  bookmarkButton.textContent = bookmarked ? "Bookmarked" : "Bookmark Chapter";
+  completeButton.textContent = isCompleted ? "Completed" : "Mark as Completed";
+
+  bookmarkButton.addEventListener("click", () => {
+    const saved = toggleChapterBookmark(chapter.id);
+    bookmarkButton.textContent = saved ? "Bookmarked" : "Bookmark Chapter";
+    showNotification(saved ? "Chapter bookmarked." : "Chapter bookmark removed.", saved ? "success" : "info");
+  });
+
+  completeButton.addEventListener("click", () => {
+    markChapterCompleted(chapter.id);
+    completeButton.textContent = "Completed";
+    showNotification("Chapter marked as completed.", "success");
+  });
+
+  prevLink.href = previousChapter ? getChapterHref(previousChapter) : getSubjectHref(subject);
+  prevLink.textContent = previousChapter ? `Previous: ${previousChapter.title}` : "Back to Subject";
+  nextLink.href = nextChapter ? getChapterHref(nextChapter) : getSubjectHref(subject);
+  nextLink.textContent = nextChapter ? `Next: ${nextChapter.title}` : "View Subject Overview";
+  prevLinkBottom.href = prevLink.href;
+  prevLinkBottom.textContent = prevLink.textContent;
+  nextLinkBottom.href = nextLink.href;
+  nextLinkBottom.textContent = nextLink.textContent;
+
+  let flashIndex = 0;
+  let flashReveal = false;
+  function renderFlashcard() {
+    const item = practiceQuestions[flashIndex];
+    if (!item) {
+      flashcardCard.innerHTML = "<p class=\"empty-state\">Flashcards will appear here after you add chapter questions.</p>";
+      return;
+    }
+    flashcardCard.innerHTML = flashReveal
+      ? `<p class="eyebrow">Answer</p><h3>${escapeHtml(item.answer?.[0] || "No answer yet.")}</h3><p>${escapeHtml(item.question)}</p>`
+      : `<p class="eyebrow">Question</p><h3>${escapeHtml(item.question)}</h3><p>Use flip to reveal the quick answer.</p>`;
+  }
+
+  flashcardFlip.addEventListener("click", () => {
+    flashReveal = !flashReveal;
+    renderFlashcard();
+  });
+  flashcardNext.addEventListener("click", () => {
+    flashIndex = practiceQuestions.length ? (flashIndex + 1) % practiceQuestions.length : 0;
+    flashReveal = false;
+    renderFlashcard();
+  });
+  renderFlashcard();
+  flashcardActions.hidden = !practiceQuestions.length;
+
+  mcqTarget.innerHTML = mcqQuestions.length
+    ? mcqQuestions.map((item) => `
+        <article class="surface chapter-resource-block">
+          <p class="eyebrow">MCQ</p>
+          <h3>${escapeHtml(item.question)}</h3>
+          ${renderInteractiveInterviewOptions(item)}
+        </article>
+      `).join("")
+    : "<p class=\"empty-state\">MCQ practice will appear here after you publish MCQ-style interview questions for this chapter.</p>";
+
+  mcqTarget.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-question-option]");
+    if (!button) {
+      return;
+    }
+    const slug = button.dataset.questionOption;
+    const optionKey = button.dataset.optionKey;
+    const question = mcqQuestions.find((item) => item.slug === slug);
+    const feedback = document.getElementById(`mcq-feedback-${slug}`);
+    const buttons = mcqTarget.querySelectorAll(`[data-question-option="${slug}"]`);
+    buttons.forEach((item) => {
+      item.classList.toggle("is-correct", item.dataset.optionKey === question?.correctOption);
+      item.classList.toggle("is-selected", item === button);
+      item.classList.toggle("is-wrong", item === button && optionKey !== question?.correctOption);
+    });
+    if (feedback && question) {
+      feedback.hidden = false;
+      feedback.textContent = optionKey === question.correctOption
+        ? "Correct. Nice recall."
+        : `Not quite. Correct answer: ${question.correctOption || "See explanation"}.`;
+      feedback.dataset.state = optionKey === question.correctOption ? "success" : "error";
+    }
+  });
+
+  let quizIndex = 0;
+  let quizScore = 0;
+  let revealed = false;
+  function finishQuiz() {
+    const result = saveChapterPracticeResult(chapter.id, quizScore, practiceQuestions.length);
+    quizFeedback.textContent = `Quiz finished. You marked ${quizScore}/${practiceQuestions.length}. Best score: ${result.bestScore}/${result.total}.`;
+    quizFeedback.dataset.state = "success";
+  }
+  function renderQuiz() {
+    const item = practiceQuestions[quizIndex];
+    if (!item) {
+      quizCard.innerHTML = "<p class=\"empty-state\">Quick quiz will appear here after you add chapter questions.</p>";
+      quizProgress.textContent = "0 / 0";
+      return;
+    }
+    quizProgress.textContent = `Question ${quizIndex + 1} of ${practiceQuestions.length}`;
+    quizCard.innerHTML = `
+      <h3>${escapeHtml(item.question)}</h3>
+      <p class="card-excerpt">${escapeHtml(item.excerpt || "Try to answer from memory before revealing the model answer.")}</p>
+      ${revealed ? item.answer.map((paragraph) => `<p>${escapeHtml(paragraph)}</p>`).join("") : "<p class=\"eyebrow\">Reveal the answer only after self-testing.</p>"}
+    `;
+  }
+  quizReveal.addEventListener("click", () => {
+    revealed = true;
+    renderQuiz();
+  });
+  function advanceQuiz(correct) {
+    if (!practiceQuestions.length) {
+      return;
+    }
+    if (correct) {
+      quizScore += 1;
+    }
+    if (quizIndex >= practiceQuestions.length - 1) {
+      finishQuiz();
+      revealed = true;
+      renderQuiz();
+      return;
+    }
+    quizIndex += 1;
+    revealed = false;
+    renderQuiz();
+  }
+  quizCorrect.addEventListener("click", () => advanceQuiz(true));
+  quizWrong.addEventListener("click", () => advanceQuiz(false));
+  renderQuiz();
+  quizActions.hidden = !practiceQuestions.length;
+
+  practiceStats.innerHTML = `
+    <span class="status-pill">${practiceRecord ? `${practiceRecord.bestScore}/${practiceRecord.total} best score` : "No quiz attempts yet"}</span>
+    <span class="status-pill">${practiceRecord ? `${practiceRecord.attempts} attempts` : "0 attempts"}</span>
+  `;
+}
+
+function populateSubjectChapterControls(subjectSelect, chapterSelect, selectedSubjectId = "", selectedChapterId = "") {
+  if (!subjectSelect || !chapterSelect) {
+    return;
+  }
+
+  const subjects = getSubjects();
+  subjectSelect.innerHTML = `
+    <option value="">Unassigned</option>
+    ${subjects.map((subject) => `<option value="${escapeHtml(subject.id)}">${escapeHtml(subject.name)}</option>`).join("")}
+  `;
+  subjectSelect.value = selectedSubjectId || "";
+
+  const activeSubjectId = subjectSelect.value || selectedSubjectId || "";
+  const chapters = activeSubjectId ? getChaptersBySubject(activeSubjectId) : [];
+  chapterSelect.innerHTML = `
+    <option value="">No chapter</option>
+    ${chapters.map((chapter) => `<option value="${escapeHtml(chapter.id)}">${escapeHtml(`Chapter ${chapter.order}: ${chapter.title}`)}</option>`).join("")}
+  `;
+  chapterSelect.value = selectedChapterId || "";
+}
+
+function syncSubjectFromCategory(categoryValue, subjectSelect, chapterSelect) {
+  if (!subjectSelect || !chapterSelect) {
+    return;
+  }
+
+  const mapping = categorySubjectDefaults[categoryValue] || null;
+  if (!mapping) {
+    return;
+  }
+
+  populateSubjectChapterControls(subjectSelect, chapterSelect, mapping.subjectId, mapping.chapterId);
+}
+
 function setupEditor() {
   const form = document.getElementById("editorForm");
   const message = document.getElementById("editorMessage");
@@ -2009,6 +3369,9 @@ function setupEditor() {
 
   const fields = {
     type: document.getElementById("postTypeInput"),
+    subjectId: document.getElementById("postSubjectInput"),
+    chapterId: document.getElementById("postChapterInput"),
+    chapterTitle: document.getElementById("postChapterTitleInput"),
     title: document.getElementById("postTitleInput"),
     category: document.getElementById("postCategoryInput"),
     readTime: document.getElementById("postReadTimeInput"),
@@ -2167,11 +3530,15 @@ function setupEditor() {
     const html = getEditorHtml();
     const options = getInterviewOptionsFromEditor();
     const plainText = extractPlainTextFromHtml(html);
+    const resolvedSubjectId = fields.subjectId?.value || getCategoryTaxonomyAssignment(fields.category.value)?.subjectId || "";
     const fallbackInterviewExcerpt = plainText
       ? `${plainText.slice(0, 140)}${plainText.length > 140 ? "..." : ""}`
       : "";
     return {
       type: fields.type.value,
+      subjectId: resolvedSubjectId,
+      chapterId: fields.chapterId?.value || "",
+      chapterTitle: fields.chapterTitle?.value.trim() || "",
       title: fields.title.value.trim(),
       category: fields.category.value,
       readTime: fields.type.value === "interview" ? "" : fields.readTime.value.trim(),
@@ -2192,6 +3559,10 @@ function setupEditor() {
 
   function populateForm(draft) {
     fields.type.value = draft.type || "note";
+    populateSubjectChapterControls(fields.subjectId, fields.chapterId, draft.subjectId || "", draft.chapterId || "");
+    if (fields.chapterTitle) {
+      fields.chapterTitle.value = draft.chapterTitle || "";
+    }
     fields.title.value = draft.title || "";
     fields.category.value = draft.category || "";
     fields.readTime.value = draft.readTime || "";
@@ -2249,8 +3620,8 @@ function setupEditor() {
       : 0;
     previewTitle.textContent = draft.title || "Untitled post";
     previewMeta.textContent = draft.type === "interview"
-      ? [draft.category, draft.level].filter(Boolean).join(" - ") || "Interview question"
-      : draft.category && draft.readTime ? `${draft.type} - ${draft.category} - ${draft.readTime}` : typeLabel;
+      ? [draft.category, draft.level, getTaxonomyLabel(draft)].filter(Boolean).join(" - ") || "Interview question"
+      : [draft.type, draft.category, draft.readTime, getTaxonomyLabel(draft)].filter(Boolean).join(" - ") || typeLabel;
     previewExcerpt.textContent = draft.excerpt || "Your excerpt will appear here.";
     previewTags.innerHTML = draft.tags.length ? draft.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("") : "";
     previewContent.innerHTML = draft.content
@@ -2322,6 +3693,7 @@ function setupEditor() {
           <h3>${escapeHtml(title)}</h3>
           <p class="card-excerpt">${escapeHtml(entry.excerpt || "No excerpt added yet.")}</p>
         </div>
+        ${getTaxonomyLabel(entry) ? `<p class="card-meta card-path">${escapeHtml(getTaxonomyLabel(entry))}</p>` : ""}
         <div class="editor-library-meta">
           <span class="status-pill">${escapeHtml(statusLabel)}</span>
           <span class="card-meta">${escapeHtml(updatedLabel ? `Updated ${updatedLabel}` : "Local entry")}</span>
@@ -2342,6 +3714,9 @@ function setupEditor() {
       : "");
     populateForm({
       type: entry.type,
+      subjectId: entry.subjectId || "",
+      chapterId: entry.chapterId || "",
+      chapterTitle: getChapterById(entry.chapterId || "")?.title || "",
       title: entry.title || entry.question || "",
       category: entry.category || "",
       readTime: entry.readTime || "",
@@ -2797,11 +4172,38 @@ function setupEditor() {
   clearDraftButton.addEventListener("click", () => {
     const wasEditing = Boolean(editingContext);
     form.reset();
+    populateSubjectChapterControls(fields.subjectId, fields.chapterId);
     localStorage.removeItem(STORAGE_KEYS.draft);
     setEditorHtml("");
     resetEditingContext();
     updatePreview();
     setInlineMessage(message, wasEditing ? "Edit mode cancelled." : "Draft cleared.", "info");
+  });
+
+  fields.subjectId?.addEventListener("change", () => {
+    populateSubjectChapterControls(fields.subjectId, fields.chapterId, fields.subjectId.value, "");
+    scheduleAutosave();
+    updatePreview();
+  });
+
+  fields.category?.addEventListener("change", () => {
+    const mapping = getCategoryTaxonomyAssignment(fields.category.value);
+    populateSubjectChapterControls(fields.subjectId, fields.chapterId, mapping?.subjectId || "", "");
+    scheduleAutosave();
+    updatePreview();
+  });
+
+  fields.chapterId?.addEventListener("change", () => {
+    if (fields.chapterTitle) {
+      fields.chapterTitle.value = getChapterById(fields.chapterId.value || "")?.title || fields.chapterTitle.value || "";
+    }
+    scheduleAutosave();
+    updatePreview();
+  });
+
+  fields.chapterTitle?.addEventListener("input", () => {
+    scheduleAutosave();
+    updatePreview();
   });
 
   form.addEventListener("submit", (event) => {
@@ -2816,9 +4218,17 @@ function setupEditor() {
       setInlineMessage(message, "Select the correct option before publishing the MCQ question.", "error");
       return;
     }
+    const chapterResult = draft.type === "interview"
+      ? { chapterId: draft.chapterId, chapter: draft.chapterId ? getChapterById(draft.chapterId) : null, created: false }
+      : ensureSubjectChapter(draft.subjectId, draft.chapterId, draft.chapterTitle || draft.title, {
+          idSeed: draft.chapterTitle || draft.title,
+          description: draft.excerpt || draft.title || "Auto-created chapter from editor."
+        });
     const post = {
       type: draft.type,
-      slug: slugify(draft.title || editingContext?.slug || `post-${Date.now()}`),
+      slug: slugify(draft.title || editingContext?.slug || `post-${Date.now()}`, `post-${Date.now()}`),
+      subjectId: draft.subjectId,
+      chapterId: chapterResult.chapterId,
       title: draft.title,
       excerpt: draft.excerpt,
       category: draft.category,
@@ -2849,15 +4259,28 @@ function setupEditor() {
       dataStore.createEntry(post);
     }
     editingContext = { slug: post.slug, type: post.type };
-    saveJson(STORAGE_KEYS.draft, { ...draft, slug: post.slug, status: "published", editing: editingContext });
+    populateSubjectChapterControls(fields.subjectId, fields.chapterId, draft.subjectId, post.chapterId);
+    if (fields.chapterTitle) {
+      fields.chapterTitle.value = chapterResult.chapter?.title || draft.chapterTitle || "";
+    }
+    saveJson(STORAGE_KEYS.draft, {
+      ...draft,
+      chapterId: post.chapterId,
+      chapterTitle: chapterResult.chapter?.title || draft.chapterTitle || "",
+      slug: post.slug,
+      status: "published",
+      editing: editingContext
+    });
     renderLocalPosts();
     setInlineMessage(message, isEditing
       ? "Local resource updated successfully."
       : draft.type === "note"
         ? "Note published into the local notes workflow."
-        : draft.type === "interview"
+      : draft.type === "interview"
           ? "Interview question published into the interview workflow."
-          : "Post published into the local blog workflow.", "success");
+          : chapterResult.created
+            ? `Post published and ${chapterResult.chapter?.title || "new chapter"} created.`
+            : "Post published into the local blog workflow.", "success");
   });
 
   localPostsGrid.addEventListener("click", (event) => {
@@ -2898,6 +4321,7 @@ function setupEditor() {
   });
 
   syncEditorTypeState();
+  populateSubjectChapterControls(fields.subjectId, fields.chapterId);
   updateEditorActionState();
   renderLocalPosts();
 }
@@ -2917,6 +4341,8 @@ function setupDetailPage() {
   const code = document.getElementById("detailCode");
   const backLink = document.getElementById("detailBackLink");
   const relatedList = document.getElementById("relatedList");
+  const relatedTitle = document.getElementById("relatedTitle");
+  const detailContextNote = document.getElementById("detailContextNote");
   const bookmarkButton = document.getElementById("bookmarkButton");
   const detailActionButton = document.getElementById("detailActionButton");
   const detailSecondaryButton = document.getElementById("detailSecondaryButton");
@@ -2951,6 +4377,7 @@ function setupDetailPage() {
     item.category,
     item.readTime,
     getItemMeta(item),
+    getTaxonomyLabel(item),
     item.status ? `Status: ${item.status}` : "",
     item.updatedAt ? `Updated: ${formatEntryTimestamp(item.updatedAt)}` : ""
   ].filter(Boolean).map((value) => `<span>${escapeHtml(value)}</span>`).join("");
@@ -2972,14 +4399,57 @@ function setupDetailPage() {
     cheatsheet: "cheatsheets.html",
     interview: "interview.html"
   };
-  backLink.href = backLinkMap[item.type] || "blog.html";
+  const relatedChapter = item.chapterId ? getChapterById(item.chapterId) : null;
+  const relatedSubject = item.subjectId ? getSubjectById(item.subjectId) : null;
+  if (relatedChapter) {
+    backLink.href = getChapterHref(relatedChapter);
+    backLink.textContent = "Back to chapter";
+  } else if (relatedSubject) {
+    backLink.href = getSubjectHref(relatedSubject);
+    backLink.textContent = "Back to subject";
+  } else {
+    backLink.href = backLinkMap[item.type] || "blog.html";
+    backLink.textContent = "Back to listing";
+  }
 
-  const relatedPool = getContentCollections()[item.type] || [];
-  relatedList.innerHTML = relatedPool
-    .filter((entry) => entry.slug !== item.slug)
-    .slice(0, 3)
-    .map(createResourceLink)
-    .join("");
+  const relatedPool = getAllContent().filter((entry) => entry.slug !== item.slug);
+  const relatedEntries = relatedPool.filter((entry) => {
+    if (item.chapterId) {
+      return entry.chapterId === item.chapterId;
+    }
+    if (item.subjectId) {
+      return entry.subjectId === item.subjectId;
+    }
+    return entry.type === item.type;
+  }).slice(0, 3);
+  if (relatedTitle) {
+    relatedTitle.textContent = relatedChapter
+      ? "More from this chapter"
+      : relatedSubject
+        ? `More from ${relatedSubject.name}`
+        : "Related resources";
+  }
+  relatedList.innerHTML = relatedEntries.length
+    ? relatedEntries.map(createResourceLink).join("")
+    : "<p class=\"empty-state\">No related resources yet.</p>";
+  if (detailContextNote) {
+    const contextBits = [
+      relatedSubject ? `<span class="status-pill">${escapeHtml(relatedSubject.name)}</span>` : "",
+      relatedChapter ? `<span class="status-pill">${escapeHtml(relatedChapter.title)}</span>` : "",
+      item.readTime ? `<span class="status-pill">${escapeHtml(item.readTime)}</span>` : "",
+      item.level ? `<span class="status-pill">${escapeHtml(item.level)}</span>` : ""
+    ].filter(Boolean).join("");
+    detailContextNote.innerHTML = `
+      <div class="detail-context-pills">${contextBits || `<span class="status-pill">${escapeHtml(item.type)}</span>`}</div>
+      <p>${escapeHtml(
+        relatedChapter
+          ? "This resource is linked to a chapter, so comments and related links stay grouped around the same lesson."
+          : relatedSubject
+            ? "This resource belongs to a subject path, so the sidebar keeps you inside the same learning track."
+            : "This standalone resource supports local bookmarks and comments to simulate a production reading workflow."
+      )}</p>
+    `;
+  }
 
   setupBookmark(item, bookmarkButton);
   setupComments(item);
@@ -3069,6 +4539,7 @@ function setupComments(item) {
   const message = document.getElementById("commentMessage");
   const nameInput = document.getElementById("commentName");
   const textInput = document.getElementById("commentText");
+  const countLabel = document.getElementById("commentCountLabel");
   const commentKey = `${item.type}:${item.slug}`;
 
   if (!form || !list || !message || !nameInput || !textInput) {
@@ -3078,10 +4549,16 @@ function setupComments(item) {
   function render() {
     const allComments = getComments();
     const comments = allComments[commentKey] || allComments[item.slug] || [];
+    if (countLabel) {
+      countLabel.textContent = `${comments.length} comment${comments.length === 1 ? "" : "s"}`;
+    }
     list.innerHTML = comments.length
       ? comments.map((comment) => `
           <article class="comment-item">
-            <strong>${escapeHtml(comment.name)}</strong>
+            <div class="comment-item-head">
+              <strong>${escapeHtml(comment.name)}</strong>
+              <span>${escapeHtml(formatCommentTime(comment.createdAt))}</span>
+            </div>
             <p>${escapeHtml(comment.text)}</p>
           </article>
         `).join("")
@@ -3105,7 +4582,7 @@ function setupComments(item) {
 
     const allComments = getComments();
     const comments = allComments[commentKey] || allComments[item.slug] || [];
-    comments.unshift({ name, text });
+    comments.unshift({ name, text, createdAt: new Date().toISOString() });
     allComments[commentKey] = comments;
     if (item.slug in allComments && item.slug !== commentKey) {
       delete allComments[item.slug];
@@ -3121,6 +4598,23 @@ function setupComments(item) {
   });
 
   render();
+}
+
+function formatCommentTime(value) {
+  if (!value) {
+    return "Just now";
+  }
+
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return "Just now";
+  }
+
+  return parsed.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  });
 }
 
 function createQuestionCard(item, isRevised) {
@@ -3507,6 +5001,8 @@ function setupDashboard() {
   const streakTarget = document.getElementById("dashboardStreaks");
   const rewardsTarget = document.getElementById("dashboardRewards");
   const leaderboardTarget = document.getElementById("dashboardLeaderboard");
+  const nextChapterTarget = document.getElementById("dashboardNextChapter");
+  const subjectProgressTarget = document.getElementById("dashboardSubjectProgress");
   const profileForm = document.getElementById("profileForm");
   const profileNameInput = document.getElementById("profileNameInput");
   const profileGoalInput = document.getElementById("profileGoalInput");
@@ -3518,7 +5014,7 @@ function setupDashboard() {
   const providerKey = document.getElementById("dashboardProviderKey");
   const providerMessage = document.getElementById("dashboardProviderMessage");
 
-  if (!stats || !bookmarksTarget || !recentTarget || !revisionTarget || !questionTarget || !progressBars || !streakTarget || !rewardsTarget || !leaderboardTarget || !profileForm || !profileNameInput || !profileGoalInput || !profileMessage || !plannerGrid || !providerForm || !providerSelect || !providerUrl || !providerKey || !providerMessage) {
+  if (!stats || !bookmarksTarget || !recentTarget || !revisionTarget || !questionTarget || !progressBars || !streakTarget || !rewardsTarget || !leaderboardTarget || !nextChapterTarget || !subjectProgressTarget || !profileForm || !profileNameInput || !profileGoalInput || !profileMessage || !plannerGrid || !providerForm || !providerSelect || !providerUrl || !providerKey || !providerMessage) {
     return;
   }
 
@@ -3540,7 +5036,8 @@ function setupDashboard() {
     { label: "Resources", value: String(getAllContent().length + allInterviewQuestions.length) },
     { label: "Bookmarks", value: String(bookmarks.length) },
     { label: "Revised", value: String(Object.keys(progress.revised || {}).length) },
-    { label: "Copied", value: String(Object.keys(progress.copied || {}).length) }
+    { label: "Copied", value: String(Object.keys(progress.copied || {}).length) },
+    { label: "Chapters", value: String(Object.keys(getChapterCompletions()).length) }
   ];
 
   stats.innerHTML = statItems.map((item) => `
@@ -3726,15 +5223,65 @@ function setupDashboard() {
     : "<p class=\"empty-state\">Mark notes, tutorials, or interview questions as revised to build your tracker.</p>";
 
   const daily = getDailyInterviewQuestion();
+  const nextChapter = getRecommendedChapter();
+  const nextSubject = nextChapter ? getSubjectById(nextChapter.subjectId) : null;
   questionTarget.innerHTML = `
     <p class="eyebrow">Daily practice</p>
     <h2>${escapeHtml(daily.question)}</h2>
     <p>${escapeHtml(daily.answer[0])}</p>
     <div class="tag-row">${daily.tags.map((tag) => `<span>${escapeHtml(tag)}</span>`).join("")}</div>
   `;
+
+  const subjectProgress = getSubjects().map((subject) => getSubjectProgressSummary(subject.id));
+  subjectProgressTarget.innerHTML = subjectProgress.map((entry) => `
+    <article class="progress-item">
+      <div class="progress-meta">
+        <strong>${escapeHtml(entry.subject?.name || "Subject")}</strong>
+        <span>${entry.completed}/${entry.chapters.length} chapters - ${entry.scorePercent}% practice</span>
+      </div>
+      <div class="progress-track">
+        <span style="width: ${entry.completionPercent}%"></span>
+      </div>
+    </article>
+  `).join("");
+
+  nextChapterTarget.innerHTML = nextChapter
+    ? `
+        <p class="eyebrow">Next chapter</p>
+        <h2>${escapeHtml(nextChapter.title)}</h2>
+        <p>${escapeHtml(nextChapter.description)}</p>
+        <div class="tag-row">
+          <span>${escapeHtml(nextSubject?.name || "Subject")}</span>
+          <span>${escapeHtml(`Chapter ${nextChapter.order}`)}</span>
+        </div>
+        <div class="hero-actions">
+          <a class="button" href="${getChapterHref(nextChapter)}">Open Chapter</a>
+          <a class="button button-ghost" href="${nextSubject ? getSubjectHref(nextSubject) : "subjects.html"}">View Subject</a>
+        </div>
+      `
+    : `
+        <p class="eyebrow">Next chapter</p>
+        <h2>No chapters yet</h2>
+        <p>Create or open a subject to start building your guided path.</p>
+      `;
 }
 
 function setupAdminPage() {
+  const subjectForm = document.getElementById("subjectForm");
+  const subjectIdInput = document.getElementById("subjectIdInput");
+  const subjectNameInput = document.getElementById("subjectNameInput");
+  const subjectDescriptionInput = document.getElementById("subjectDescriptionInput");
+  const subjectIconInput = document.getElementById("subjectIconInput");
+  const subjectMessage = document.getElementById("subjectMessage");
+  const subjectList = document.getElementById("adminSubjectList");
+  const chapterForm = document.getElementById("chapterForm");
+  const chapterIdInput = document.getElementById("chapterIdInput");
+  const chapterSubjectInput = document.getElementById("chapterSubjectInput");
+  const chapterTitleInput = document.getElementById("chapterTitleInput");
+  const chapterOrderInput = document.getElementById("chapterOrderInput");
+  const chapterDescriptionInput = document.getElementById("chapterDescriptionInput");
+  const chapterMessage = document.getElementById("chapterMessage");
+  const chapterList = document.getElementById("adminChapterList");
   const providerForm = document.getElementById("providerForm");
   const providerSelect = document.getElementById("providerSelect");
   const providerUrlInput = document.getElementById("providerUrlInput");
@@ -3742,6 +5289,8 @@ function setupAdminPage() {
   const providerMessage = document.getElementById("providerMessage");
   const adminEntryForm = document.getElementById("adminEntryForm");
   const adminTypeInput = document.getElementById("adminTypeInput");
+  const adminSubjectInput = document.getElementById("adminSubjectInput");
+  const adminChapterInput = document.getElementById("adminChapterInput");
   const adminTitleInput = document.getElementById("adminTitleInput");
   const adminCategoryInput = document.getElementById("adminCategoryInput");
   const adminReadTimeInput = document.getElementById("adminReadTimeInput");
@@ -3764,7 +5313,7 @@ function setupAdminPage() {
   const adminEntryMessage = document.getElementById("adminEntryMessage");
   const adminResourceList = document.getElementById("adminResourceList");
 
-  if (!providerForm || !providerSelect || !providerUrlInput || !providerKeyInput || !providerMessage || !adminEntryForm || !adminTypeInput || !adminTitleInput || !adminCategoryInput || !adminReadTimeInput || !adminExcerptInput || !adminContentInput || !adminInterviewFields || !adminCompaniesInput || !adminLevelInput || !adminOptionAInput || !adminOptionBInput || !adminOptionCInput || !adminOptionDInput || !adminCorrectOptionInput || !adminTagsInput || !adminCodeInput || !adminEditingSlug || !adminEditingType || !adminCancelEdit || !adminSubmitButton || !adminEntryMessage || !adminResourceList) {
+  if (!providerForm || !providerSelect || !providerUrlInput || !providerKeyInput || !providerMessage || !adminEntryForm || !adminTypeInput || !adminSubjectInput || !adminChapterInput || !adminTitleInput || !adminCategoryInput || !adminReadTimeInput || !adminExcerptInput || !adminContentInput || !adminInterviewFields || !adminCompaniesInput || !adminLevelInput || !adminOptionAInput || !adminOptionBInput || !adminOptionCInput || !adminOptionDInput || !adminCorrectOptionInput || !adminTagsInput || !adminCodeInput || !adminEditingSlug || !adminEditingType || !adminCancelEdit || !adminSubmitButton || !adminEntryMessage || !adminResourceList || !subjectForm || !subjectIdInput || !subjectNameInput || !subjectDescriptionInput || !subjectIconInput || !subjectMessage || !subjectList || !chapterForm || !chapterIdInput || !chapterSubjectInput || !chapterTitleInput || !chapterOrderInput || !chapterDescriptionInput || !chapterMessage || !chapterList) {
     return;
   }
 
@@ -3782,21 +5331,58 @@ function setupAdminPage() {
 
   function resetAdminForm() {
     adminEntryForm.reset();
+    populateSubjectChapterControls(adminSubjectInput, adminChapterInput);
     adminEditingSlug.value = "";
     adminEditingType.value = "";
     adminSubmitButton.textContent = "Create Resource";
     syncAdminTypeState();
   }
 
+  function renderSubjectStudio() {
+    const subjects = getSubjects();
+    const chapters = getChapters();
+    const selectedChapterSubject = chapterSubjectInput.value;
+    populateSubjectChapterControls(adminSubjectInput, adminChapterInput, adminSubjectInput.value, adminChapterInput.value);
+    chapterSubjectInput.innerHTML = `
+      <option value="">Select subject</option>
+      ${subjects.map((subject) => `<option value="${escapeHtml(subject.id)}">${escapeHtml(subject.name)}</option>`).join("")}
+    `;
+    if (selectedChapterSubject && subjects.some((subject) => subject.id === selectedChapterSubject)) {
+      chapterSubjectInput.value = selectedChapterSubject;
+    } else if (subjects[0]) {
+      chapterSubjectInput.value = subjects[0].id;
+    }
+
+    subjectList.innerHTML = subjects.map((subject) => {
+      const progress = getSubjectProgressSummary(subject.id);
+      return `
+        <article class="resource-link is-static">
+          <strong>${escapeHtml(subject.name)}</strong>
+          <span>${escapeHtml(`${progress.chapters.length} chapters - ${progress.completionPercent}% complete`)}</span>
+        </article>
+      `;
+    }).join("");
+
+    chapterList.innerHTML = chapters.map((chapter) => {
+      const subject = getSubjectById(chapter.subjectId);
+      return `
+        <article class="resource-link is-static">
+          <strong>${escapeHtml(`Chapter ${chapter.order}: ${chapter.title}`)}</strong>
+          <span>${escapeHtml(subject?.name || "Subject")} - ${getChapterResources(chapter.id).questions.length} questions</span>
+        </article>
+      `;
+    }).join("");
+  }
+
   function renderAdminResources() {
     const entries = dataStore.listEntries();
     adminResourceList.innerHTML = entries.length
       ? entries.map((entry) => `
-          <article class="resource-link is-static admin-item">
-            <div>
-              <strong>${escapeHtml(entry.type)}: ${escapeHtml(entry.title || entry.question)}</strong>
-              <span>${escapeHtml(entry.category)} - ${escapeHtml(entry.readTime || "Custom")}</span>
-            </div>
+        <article class="resource-link is-static admin-item">
+          <div>
+            <strong>${escapeHtml(entry.type)}: ${escapeHtml(entry.title || entry.question)}</strong>
+              <span>${escapeHtml([entry.category, entry.readTime || "Custom", getTaxonomyLabel(entry)].filter(Boolean).join(" - "))}</span>
+          </div>
             <div class="admin-item-actions">
               <button class="button button-ghost button-small" type="button" data-admin-edit="${escapeHtml(entry.slug)}" data-admin-type="${escapeHtml(entry.type)}">Edit</button>
               <button class="button button-ghost button-small" type="button" data-admin-delete="${escapeHtml(entry.slug)}" data-admin-delete-type="${escapeHtml(entry.type)}">Delete</button>
@@ -3836,6 +5422,7 @@ function setupAdminPage() {
       adminEditingSlug.value = entry.slug;
       adminEditingType.value = entry.type;
       adminTypeInput.value = entry.type;
+      populateSubjectChapterControls(adminSubjectInput, adminChapterInput, entry.subjectId || "", entry.chapterId || "");
       adminTitleInput.value = entry.title || entry.question || "";
       adminCategoryInput.value = entry.category || "";
       adminReadTimeInput.value = entry.readTime || "";
@@ -3882,7 +5469,11 @@ function setupAdminPage() {
     const isEditing = Boolean(adminEditingSlug.value && adminEditingType.value);
     const entry = {
       type,
-      slug: isEditing ? slugify(adminTitleInput.value || adminEditingSlug.value) : slugify(adminTitleInput.value || `${type}-${Date.now()}`),
+      slug: isEditing
+        ? slugify(adminTitleInput.value || adminEditingSlug.value, adminEditingSlug.value || `${type}-${Date.now()}`)
+        : slugify(adminTitleInput.value || `${type}-${Date.now()}`, `${type}-${Date.now()}`),
+      subjectId: adminSubjectInput.value,
+      chapterId: adminChapterInput.value,
       title: adminTitleInput.value.trim(),
       excerpt: adminExcerptInput.value.trim(),
       category: adminCategoryInput.value.trim(),
@@ -3929,10 +5520,140 @@ function setupAdminPage() {
     renderAdminResources();
   });
 
+  subjectForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const subject = {
+      id: slugify(subjectIdInput.value || subjectNameInput.value || `subject-${Date.now()}`),
+      name: subjectNameInput.value.trim(),
+      description: subjectDescriptionInput.value.trim(),
+      icon: subjectIconInput.value.trim()
+    };
+    const customSubjects = loadJson(STORAGE_KEYS.subjects, []);
+    const next = customSubjects.filter((item) => item.id !== subject.id);
+    next.unshift(subject);
+    saveJson(STORAGE_KEYS.subjects, next);
+    subjectForm.reset();
+    setInlineMessage(subjectMessage, "Subject saved successfully.", "success");
+    renderSubjectStudio();
+  });
+
+  chapterForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const chapter = {
+      id: slugify(chapterIdInput.value || chapterTitleInput.value || `chapter-${Date.now()}`),
+      subjectId: chapterSubjectInput.value,
+      title: chapterTitleInput.value.trim(),
+      order: Number(chapterOrderInput.value || 1),
+      description: chapterDescriptionInput.value.trim()
+    };
+    const customChapters = loadJson(STORAGE_KEYS.chapters, []);
+    const next = customChapters.filter((item) => item.id !== chapter.id);
+    next.unshift(chapter);
+    saveJson(STORAGE_KEYS.chapters, next);
+    chapterForm.reset();
+    setInlineMessage(chapterMessage, "Chapter saved successfully.", "success");
+    renderSubjectStudio();
+  });
+
+  adminSubjectInput.addEventListener("change", () => {
+    populateSubjectChapterControls(adminSubjectInput, adminChapterInput, adminSubjectInput.value, "");
+  });
+
+  adminCategoryInput.addEventListener("change", () => {
+    syncSubjectFromCategory(adminCategoryInput.value.trim(), adminSubjectInput, adminChapterInput);
+  });
+
   adminTypeInput.addEventListener("change", syncAdminTypeState);
   syncAdminTypeState();
 
+  renderSubjectStudio();
   renderAdminResources();
+}
+
+function setupAIAssistant() {
+  const toggleBtn = document.getElementById("aiToggleBtn");
+  const closeBtn = document.getElementById("aiCloseBtn");
+  const panel = document.getElementById("aiPanel");
+  const input = document.getElementById("aiInput");
+  const sendBtn = document.getElementById("aiSendBtn");
+  const messages = document.getElementById("aiMessages");
+  const featureButtons = Array.from(document.querySelectorAll(".ai-feature-btn"));
+
+  if (!toggleBtn || !closeBtn || !panel || !input || !sendBtn || !messages) {
+    return;
+  }
+
+  const aiResponses = {
+    "quick-tips": "Here are some quick tips:\n\n💡 Use semantic HTML for better accessibility and SEO\n💡 Keep CSS simple and maintainable with design tokens\n💡 Test your code on multiple browsers and devices\n💡 Write clean, readable code for your future self",
+    "concept-explain": "Choose a concept from TechAmitCode to explore:\n\n📚 CSS Flexbox\n📚 JavaScript Closures\n📚 React State Management\n📚 HTML Semantics\n📚 Responsive Design\n\nType a concept name or browse the tutorials section for detailed explanations.",
+    "code-review": "Good code review habits:\n\n🔍 Check for semantic HTML structure\n🔍 Verify CSS follows design tokens\n🔍 Ensure JavaScript is maintainable\n🔍 Look for accessibility issues\n🔍 Test edge cases\n\nShare your code snippet or visit the projects section for build briefs.",
+    "interview-prep": "Interview prep resources:\n\n🎯 Practice questions in the Interview section\n🎯 Study notes for HTML, CSS, JavaScript\n🎯 Review cheat sheets for quick recall\n🎯 Practice mock tests to build confidence\n🎯 Mark revised questions after studying answers"
+  };
+
+  function togglePanel() {
+    const isHidden = panel.hasAttribute("hidden");
+    if (isHidden) {
+      panel.removeAttribute("hidden");
+      input.focus();
+    } else {
+      panel.setAttribute("hidden", "");
+    }
+  }
+
+  function addMessage(text, sender = "assistant") {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `ai-message ${sender}`;
+    msgDiv.textContent = text;
+    messages.appendChild(msgDiv);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function handleFeatureClick(feature) {
+    const response = aiResponses[feature] || "Feature not available yet. Try another option.";
+    addMessage(response, "assistant");
+  }
+
+  function handleUserMessage() {
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    setTimeout(() => {
+      const responses = [
+        "That's a great question! Check the tutorials section for detailed explanations.",
+        "Good thinking! Related resources are available in the learning paths.",
+        "I can help with that. Try browsing the relevant chapter or notes.",
+        "Smart question! Bookmark this resource and revisit it during practice.",
+        "Excellent! Keep practicing with interview questions to build confidence."
+      ];
+      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      addMessage(randomResponse, "assistant");
+    }, 600);
+  }
+
+  toggleBtn.addEventListener("click", togglePanel);
+  closeBtn.addEventListener("click", togglePanel);
+
+  featureButtons.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const feature = btn.dataset.feature;
+      addMessage(btn.textContent.trim(), "user");
+      setTimeout(() => {
+        handleFeatureClick(feature);
+      }, 300);
+    });
+  });
+
+  sendBtn.addEventListener("click", handleUserMessage);
+  input.addEventListener("keypress", (event) => {
+    if (event.key === "Enter") {
+      handleUserMessage();
+    }
+  });
+
+  addMessage("मुझसे कोई भी सवाल पूछें या कोई फीचर चुनें। I'm here to help your learning journey!", "assistant");
 }
 
 function init() {
@@ -3944,10 +5665,12 @@ function init() {
   setupTheme();
   syncGlobalSearchForms(page);
   setupNewsletter();
+  setupAIAssistant();
 
   if (page === "home") {
     setupHomeParticles();
     setupHomeAuth();
+    renderHomeHeroStats();
     renderFeaturedContent();
     setupHomeWorkspace();
   }
@@ -3958,6 +5681,18 @@ function init() {
 
   if (page === "search") {
     setupSearchPage();
+  }
+
+  if (page === "subjects") {
+    setupSubjectsPage();
+  }
+
+  if (page === "subject") {
+    setupSubjectDetailPage();
+  }
+
+  if (page === "chapter") {
+    setupChapterPage();
   }
 
   if (page === "editor") {
